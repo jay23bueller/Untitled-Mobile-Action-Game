@@ -63,36 +63,73 @@ public class PlayerController : MonoBehaviour
 
     public void Attack()
     {
-        if(initialAttack)
+        //if(initialAttack)
+        //{
+        //    initialAttack = false;
+        //    isAttacking = true;
+        //    attackDirection = new Vector3(inputs.Player.Walk.ReadValue<Vector2>().x, 0f, inputs.Player.Walk.ReadValue<Vector2>().y);
+        //    transform.forward = Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * attackDirection;
+        //    anim.SetBool("attack", true);
+        //    anim.SetInteger("attackNum", 0);
+        //}
+        //else if(nextAttack)
+        //{
+
+
+        //    attackDirection = new Vector3(inputs.Player.Walk.ReadValue<Vector2>().x, 0f, inputs.Player.Walk.ReadValue<Vector2>().y);
+        //    if (attackDirection.magnitude > 0)
+        //        lateUpdate = true;
+
+
+
+        //    Debug.Log(transform.forward);
+        //    anim.SetInteger("attackNum", attackNum);
+        //    nextAttack = false;
+        //} 
+        //else if(!resetAttack)
+        //{
+        //    Debug.Log("Called");
+        //    anim.SetBool("attack", false);
+        //    resetAttack = true;
+        //    initialAttack = true;
+        //    isAttacking = false;
+        //    attackNum = 0;
+        //}
+
+        AnimatorStateInfo animStateInfo = anim.GetCurrentAnimatorStateInfo(0);
+
+        attackDirection = new Vector3(inputs.Player.Walk.ReadValue<Vector2>().x, 0f, inputs.Player.Walk.ReadValue<Vector2>().y);
+
+        if(((attackNum + 1) != 3) && !nextAttack && animStateInfo.IsTag("Attack") && animStateInfo.normalizedTime > .5f && animStateInfo.normalizedTime < 1f)
         {
-            initialAttack = false;
-            isAttacking = true;
-            attackDirection = new Vector3(inputs.Player.Walk.ReadValue<Vector2>().x, 0f, inputs.Player.Walk.ReadValue<Vector2>().y);
-            transform.forward = Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * attackDirection;
-            anim.SetBool("attack", true);
-            anim.SetInteger("attackNum", 0);
+            //Is currently doing an attack and there is another state for the combo
+            nextAttack = true;
+            Debug.Log("enxt");
+            attackNum = (attackNum + 1) % 3;
+
+
         }
-        else if(nextAttack)
+        else if(attackNum == 0)
         {
+            anim.SetInteger("attackNum", attackNum);
+            anim.SetBool("attack", true);
+        }
 
-            
-            attackDirection = new Vector3(inputs.Player.Walk.ReadValue<Vector2>().x, 0f, inputs.Player.Walk.ReadValue<Vector2>().y);
-            if (attackDirection.magnitude > 0)
-                lateUpdate = true;
+    }
 
-            
-
-            Debug.Log(transform.forward);
+    private void CheckForNextAttack()
+    {
+        if(nextAttack)
+        {
+            lateUpdate = true;
+            Debug.Log("sort a called " + attackNum);
             anim.SetInteger("attackNum", attackNum);
             nextAttack = false;
-        } 
-        else if(!resetAttack)
+        } else
         {
             Debug.Log("Called");
             anim.SetBool("attack", false);
-            resetAttack = true;
-            initialAttack = true;
-            isAttacking = false;
+           
             attackNum = 0;
         }
     }
@@ -110,7 +147,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         inputs = new PlayerInputActions();
-        inputs.Player.Attack.performed += _ =>{ InitialAttack(); };
+        inputs.Player.Attack.performed += _ =>{ Attack(); };
         controller = GetComponent<CharacterController>();
     }
 
@@ -138,7 +175,7 @@ public class PlayerController : MonoBehaviour
             movementInput = Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * movementInput;
 
             transform.forward = Vector3.Slerp(transform.forward, movementInput, .1f);
-            Debug.Log("move called?");
+
             controller.Move(movementInput * movementSpeed * Time.deltaTime);
         }
 
