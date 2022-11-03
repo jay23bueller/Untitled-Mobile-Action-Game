@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,8 @@ public class Weapon : MonoBehaviour
 {
     [SerializeField]
     private float damageAmount;
+    [SerializeField]
+    private AudioClip[] weaponSwingSounds;
     private bool damageEnabled;
 
     private void Awake()
@@ -16,6 +19,11 @@ public class Weapon : MonoBehaviour
     public void EnableDamage(bool value)
     {
         damageEnabled = value;
+    }
+
+    public void PlayWeaponSwingSound()
+    {
+        HitManager.Instance.PlayWeaponSound(weaponSwingSounds[Mathf.FloorToInt(Random.Range(0f, weaponSwingSounds.Length - 1))]);
     }
 
 

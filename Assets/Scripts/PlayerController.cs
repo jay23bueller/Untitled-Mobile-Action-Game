@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
 
     //Attack Related Parameters
     [SerializeField]
-    private float capsuleCastRadius;
+    private float castRadius;
     private RaycastHit hit;
     [SerializeField]
     private float attackRange;
@@ -43,6 +43,8 @@ public class PlayerController : MonoBehaviour
     private float minTimeScale;
 
 
+
+
     private void OnAnimatorMove()
     {
         if(anim.GetBool("attack"))
@@ -55,12 +57,16 @@ public class PlayerController : MonoBehaviour
                 transform.forward = attackDirection.magnitude  == 0 ? transform.forward : Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * attackDirection;
 
 
-                Physics.CapsuleCast(
-                (controller.height / 2 * transform.up) + transform.position,
-                (controller.height / 2 * -transform.up) + transform.position,
-                capsuleCastRadius,
-                transform.forward,
-                out hit, attackRange, LayerMask.GetMask("Enemy"));
+                //Physics.CapsuleCast(
+                //(controller.center + transform.position) + (transform.right * -5f),
+                //(controller.center + transform.position) + (transform.right * 5f),
+                //capsuleCastRadius,
+                //transform.forward,
+                //out hit, attackRange, LayerMask.GetMask("Enemy"));
+
+                Physics.SphereCast(transform.position + controller.center, castRadius, transform.forward, out hit, attackRange, LayerMask.GetMask("Enemy"));
+
+                
 
 
                 
@@ -69,7 +75,7 @@ public class PlayerController : MonoBehaviour
                     playerToEnemyDirection = (hit.collider.transform.position - transform.position);
                     
 
-                    Debug.DrawLine(transform.position, playerToEnemyDirection + transform.position, Color.red, 2f);
+                    Debug.DrawLine(transform.position + controller.center, hit.collider.transform.position + controller.center, Color.red, 2f);
                     attackVelocity = playerToEnemyDirection / (anim.GetCurrentAnimatorStateInfo(0).length - (anim.GetCurrentAnimatorStateInfo(0).length*.5f));
                     
 
@@ -100,7 +106,7 @@ public class PlayerController : MonoBehaviour
     //}
 
 
-    public void Attack()
+    private void Attack()
     {
 
         if(!anim.GetBool("attack"))
@@ -207,6 +213,11 @@ public class PlayerController : MonoBehaviour
         }
 
         Time.timeScale = 1f;
+    }
+
+    private void PlayEquippedWeaponSound()
+    {
+        playerWeapon.PlayWeaponSwingSound();
     }
 
 

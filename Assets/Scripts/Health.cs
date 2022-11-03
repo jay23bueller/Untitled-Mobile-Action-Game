@@ -38,9 +38,8 @@ public class Health : MonoBehaviour, IDamageable
             Debug.Log("Applied " + damageAmount + "!");
             StartCoroutine(other.GetComponent<PlayerController>().ShakeCameraAndSlowDownTime());
             isInvulernable = true;
-            AudioSource.PlayClipAtPoint(hurtAudioClip, transform.position);
-            if(!hurtParticleSystem.isPlaying)
-                hurtParticleSystem.Play();
+            HitManager.Instance.PlayHitSound();
+            HitManager.Instance.PlaySwordHitEffect(transform.position + (Vector3.up * (GetComponent<CharacterController>().height/2)));
             StartCoroutine(ResetInvulernability());
         }
         
