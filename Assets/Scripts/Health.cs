@@ -20,7 +20,6 @@ public class Health : MonoBehaviour, IDamageable
     void Awake()
     {
         currentHealth = maxHealth;
-        
     }
 
     
@@ -33,13 +32,18 @@ public class Health : MonoBehaviour, IDamageable
 
     public void ApplyDamage(float damageAmount, GameObject other)
     {
+        Debug.Log("Attack?");
         if(!isInvulernable)
         {
             Debug.Log("Applied " + damageAmount + "!");
             StartCoroutine(other.GetComponent<PlayerController>().ShakeCameraAndSlowDownTime());
             isInvulernable = true;
             HitManager.Instance.PlayHitSound();
-            HitManager.Instance.PlaySwordHitEffect(transform.position + (Vector3.up * (GetComponent<CharacterController>().height/2)));
+
+            if (GetComponent<CharacterController>() != null)
+                HitManager.Instance.PlaySwordHitEffect(transform.position + (Vector3.up * (GetComponent<CharacterController>().height / 2)));
+            else
+                HitManager.Instance.PlaySwordHitEffect(transform.position + (Vector3.up * (GetComponent<CapsuleCollider>().height / 2)));
             StartCoroutine(ResetInvulernability());
         }
         

@@ -13,7 +13,11 @@ public class Weapon : MonoBehaviour
 
     private void Awake()
     {
-        Physics.IgnoreCollision(GetComponentInParent<CharacterController>(), GetComponent<MeshCollider>());
+        if(GetComponentInParent<CharacterController>() != null)
+            Physics.IgnoreCollision(GetComponentInParent<CharacterController>(), GetComponent<BoxCollider>());
+
+        if (GetComponentInParent<CapsuleCollider>() != null)
+            Physics.IgnoreCollision(GetComponentInParent<CapsuleCollider>(), GetComponent<BoxCollider>());
     }
 
     public void EnableDamage(bool value)

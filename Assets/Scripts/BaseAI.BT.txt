@@ -1,0 +1,37 @@
+tree("Root")
+	race
+		tree("Attack")
+		tree("Chase")
+		tree("Patrol")
+		
+		
+
+tree("Chase")
+	sequence
+		HasLineOfSight
+		ChasePlayer
+
+
+tree("Patrol")
+	fallback
+		sequence
+			not HasLineOfSight
+			not IsDestinationSet
+			FindWaypoint
+			SetDestination
+		sequence 
+			HasArrivedAtDestination
+			repeat(20)
+				while not HasLineOfSight
+					Wait(0.1)
+			ResetDestination
+
+
+tree("Attack")
+	sequence
+		IsNearPlayer
+		WindupAttack
+		Wait(0.7)
+		Attack
+		Wait(2.0)
+

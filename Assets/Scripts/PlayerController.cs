@@ -100,11 +100,6 @@ public class PlayerController : MonoBehaviour
         
     }
 
-    //private void LateUpdate()
-    //{
-
-    //}
-
 
     private void Attack()
     {
@@ -115,7 +110,6 @@ public class PlayerController : MonoBehaviour
             anim.Play("Base Layer.Axe_Combo_1");
             anim.SetInteger("attackNum", 0);
             anim.SetBool("attack", true);
-            playerWeapon.EnableDamage(true);
         }
         else
         {
@@ -221,6 +215,10 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    private void EnableEquippedWeaponDamage(int value)
+    {
+        playerWeapon.EnableDamage(value == 1 ? true : false);
+    }
 
 
 
