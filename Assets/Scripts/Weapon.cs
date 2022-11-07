@@ -11,6 +11,9 @@ public class Weapon : MonoBehaviour
     private AudioClip[] weaponSwingSounds;
     private bool damageEnabled;
 
+    [SerializeField]
+    private GameObject trailManager;
+
     private void Awake()
     {
         if(GetComponentInParent<CharacterController>() != null)
@@ -18,6 +21,7 @@ public class Weapon : MonoBehaviour
 
         if (GetComponentInParent<CapsuleCollider>() != null)
             Physics.IgnoreCollision(GetComponentInParent<CapsuleCollider>(), GetComponent<BoxCollider>());
+
     }
 
     public void EnableDamage(bool value)
@@ -30,6 +34,11 @@ public class Weapon : MonoBehaviour
         HitManager.Instance.PlayWeaponSound(weaponSwingSounds[Mathf.FloorToInt(Random.Range(0f, weaponSwingSounds.Length - 1))]);
     }
 
+    public void EnableWeaponTrail(bool value)
+    {
+        trailManager.SetActive(value);
+    }
+
 
 
 
@@ -37,8 +46,8 @@ public class Weapon : MonoBehaviour
     {
         if (damageEnabled)
         {
-            Debug.Log(other.name);
-            if (other.GetComponent<IDamageable>() != null)
+
+            if (other.GetComponent<IDamageable>() != null && other.GetComponent<Controller>().gameObject != GetComponentInParent<Controller>().gameObject)
             {
                 other.gameObject.GetComponent<IDamageable>().ApplyDamage(damageAmount, GetComponentInParent<Health>().gameObject);
 

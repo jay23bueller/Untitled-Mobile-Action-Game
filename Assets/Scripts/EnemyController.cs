@@ -30,10 +30,6 @@ public class EnemyController : Controller
         vision = GetComponentInChildren<EnemyVision>();
     }
 
-    private void Start()
-    {
-
-    }
 
     private void Update()
     {

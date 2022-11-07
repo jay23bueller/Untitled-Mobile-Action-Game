@@ -471,7 +471,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 110192}
-  m_LocalRotation: {x: 0.6324858, y: 0.57854766, z: 0.37547132, w: -0.3525135}
+  m_LocalRotation: {x: 0.63248575, y: 0.57854766, z: 0.37547126, w: -0.3525135}
   m_LocalPosition: {x: -5.801534, y: -4.191418, z: 7.44715}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2795,9 +2795,12 @@ GameObject:
   - component: {fileID: 9566420}
   - component: {fileID: 6199576112089080315}
   - component: {fileID: 3093050110921580248}
+  - component: {fileID: 2110778825}
+  - component: {fileID: 2110778817}
+  - component: {fileID: 2110778821}
   m_Layer: 0
   m_Name: Character_Hero_Knight_Male
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2844,11 +2847,11 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 162860}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: b69174d668ba02d44b14a084b217670a, type: 3}
+  m_Avatar: {fileID: 9000000, guid: d266dc51497363d419897134f28b0340, type: 3}
   m_Controller: {fileID: 9100000, guid: dd683c62137d692449ebba0d92b217b6, type: 2}
-  m_CullingMode: 1
+  m_CullingMode: 0
   m_UpdateMode: 0
-  m_ApplyRootMotion: 0
+  m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_WarningMessage: 
@@ -2866,13 +2869,13 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 1.84
+  m_Height: 1.72
   m_Radius: 0.42
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.9, z: 0}
+  m_Center: {x: 0, y: 0.97, z: 0}
 --- !u!114 &3093050110921580248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2885,14 +2888,222 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: beb0e218cd33c1e428fcb83e03857699, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSpeed: 10
-  castRadius: 0
-  attackRange: 0
-  minDistanceFromEnemy: 0
+  stunDuration: 0
+  movementSpeed: 6
+  castRadius: 1
+  attackRange: 3
+  minDistanceFromEnemy: 1.2
   freeLookCam: {fileID: 0}
-  cameraMaxAmp: 0
-  cameraMaxFreq: 0
-  minTimeScale: 0
+  cameraMaxAmp: 3
+  cameraMaxFreq: 1
+  minTimeScale: 0.3
+  standingHeight: 1.72
+  rollingHeight: 0.6
+--- !u!208 &2110778825
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 162860}
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Shape: 0
+  m_Extents: {x: 0.42, y: 0.86, z: 0.42}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0.97, z: 0}
+  m_TimeToStationary: 0.5
+--- !u!114 &2110778817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 162860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 246455474a0d74a4291b3cedc896ebdf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bonePaths:
+  - 
+  - Character_Ghost_01
+  - Character_Ghost_02
+  - Character_Goblin_Female
+  - Character_Goblin_Male
+  - Character_Goblin_Shaman
+  - Character_Goblin_WarChief
+  - Character_Goblin_Warrior_Female
+  - Character_Goblin_Warrior_Male
+  - Character_Hero_Knight_Female
+  - Character_Hero_Knight_Male
+  - Character_Rock_Golem
+  - Character_Skeleton_Knight
+  - Character_Skeleton_Slave_01
+  - Character_Skeleton_Soldier_01
+  - Character_Skeleton_Soldier_02
+  - Character_Tormented_Soul
+  - Root
+  - Root/Hips
+  - Root/Hips/SM_Item_Bag_Large
+  - Root/Hips/SM_Item_Bags
+  - Root/Hips/SM_Item_Bones
+  - Root/Hips/SM_Item_Horn
+  - Root/Hips/SM_Item_Shrooms
+  - Root/Hips/SM_Item_Shrunken_Head
+  - Root/Hips/Spine_01
+  - Root/Hips/Spine_01/Spine_02
+  - Root/Hips/Spine_01/Spine_02/SM_Item_Goblin_WarBanner
+  - Root/Hips/Spine_01/Spine_02/SM_Item_Shield
+  - Root/Hips/Spine_01/Spine_02/SM_Item_Sword
+  - Root/Hips/Spine_01/Spine_02/Spine_03
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/Finger_01
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/Finger_01/Finger_02
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/Finger_01/Finger_02/Finger_03
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/Finger_01/Finger_02/Finger_03/Finger_04
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/IndexFinger_01
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/IndexFinger_01/IndexFinger_02
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/IndexFinger_01/IndexFinger_02/IndexFinger_03
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/IndexFinger_01/IndexFinger_02/IndexFinger_03/IndexFinger_04
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/Thumb_01
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/Thumb_01/Thumb_02
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_L/Shoulder_L/Elbow_L/Hand_L/Thumb_01/Thumb_02/Thumb_03
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/Finger_01
+    1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/Finger_01
+    1/Finger_02 1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/Finger_01
+    1/Finger_02 1/Finger_03 1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/Finger_01
+    1/Finger_02 1/Finger_03 1/Finger_04 1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/IndexFinger_01
+    1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/IndexFinger_01
+    1/IndexFinger_02 1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/IndexFinger_01
+    1/IndexFinger_02 1/IndexFinger_03 1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/IndexFinger_01
+    1/IndexFinger_02 1/IndexFinger_03 1/IndexFinger_04 1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/IndexFinger_01
+    1/SM_Wep_GreatSword_01
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/Thumb_01
+    1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/Thumb_01
+    1/Thumb_02 1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Clavicle_R/Shoulder_R/Elbow_R/Hand_R/Thumb_01
+    1/Thumb_02 1/Thumb_03 1
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Neck
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Neck/Head
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Neck/Head/Eyebrows
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Neck/Head/Eyes
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Neck/Head/SM_Item_Goblin_Hair
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Neck/Head/SM_Item_Mask_01
+  - Root/Hips/Spine_01/Spine_02/Spine_03/Neck/Head/SM_Item_Mask_02
+  - Root/Hips/UpperLeg_L
+  - Root/Hips/UpperLeg_L/LowerLeg_L
+  - Root/Hips/UpperLeg_L/LowerLeg_L/Ankle_L
+  - Root/Hips/UpperLeg_L/LowerLeg_L/Ankle_L/Ball_L
+  - Root/Hips/UpperLeg_L/LowerLeg_L/Ankle_L/Ball_L/Toes_L
+  - Root/Hips/UpperLeg_R
+  - Root/Hips/UpperLeg_R/LowerLeg_R
+  - Root/Hips/UpperLeg_R/LowerLeg_R/Ankle_R
+  - Root/Hips/UpperLeg_R/LowerLeg_R/Ankle_R/Ball_R
+  - Root/Hips/UpperLeg_R/LowerLeg_R/Ankle_R/Ball_R/Toes_R
+  - LookAt
+  showBones: 00000000190000001a0000001f0000002000000021000000220000002e0000002f00000030000000310000003e0000003f000000450000004600000047000000480000004a0000004b0000004c0000004d000000
+  foldoutBones: 2c000000370000003e00000047000000210000003200000030000000190000003f00000048000000450000002f000000280000003c00000031000000250000004d000000240000001f0000004c0000002300000029000000200000004a000000220000001e000000270000004b0000002b0000000000000011000000460000002e00000036000000330000001200000038000000340000003b0000001a000000
+  mirrorBones: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff2e0000002f0000003000000031000000320000003300000034000000ffffffff360000003700000038000000ffffffff3b0000003c0000003d0000001f000000200000002100000022000000230000002400000025000000ffffffff270000002800000029000000ffffffffffffffff2b0000002c0000002d000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff4a0000004b0000004c0000004d0000004e0000004500000046000000470000004800000049000000ffffffff
+  mirrorBlendShape: []
+  animatorIkData:
+  - enable: 0
+    _fixed: 0
+    autoRotation: 0
+    spaceType: 0
+    parent: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    headWeight: 1
+    eyesWeight: 0
+    swivelRotation: 0
+    swivelPosition: {x: 0, y: 0, z: 0}
+    parentPath: 
+  - enable: 0
+    _fixed: 0
+    autoRotation: 0
+    spaceType: 0
+    parent: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    headWeight: 1
+    eyesWeight: 0
+    swivelRotation: 0
+    swivelPosition: {x: 0, y: 0, z: 0}
+    parentPath: 
+  - enable: 0
+    _fixed: 0
+    autoRotation: 0
+    spaceType: 0
+    parent: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    headWeight: 1
+    eyesWeight: 0
+    swivelRotation: 0
+    swivelPosition: {x: 0, y: 0, z: 0}
+    parentPath: 
+  - enable: 0
+    _fixed: 0
+    autoRotation: 0
+    spaceType: 0
+    parent: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    headWeight: 1
+    eyesWeight: 0
+    swivelRotation: 0
+    swivelPosition: {x: 0, y: 0, z: 0}
+    parentPath: 
+  - enable: 0
+    _fixed: 0
+    autoRotation: 0
+    spaceType: 0
+    parent: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    headWeight: 1
+    eyesWeight: 0
+    swivelRotation: 0
+    swivelPosition: {x: 0, y: 0, z: 0}
+    parentPath: 
+  originalIkData: []
+  selectionData: []
+  lastSelectAnimationClip: {fileID: 7400000, guid: a23cd345310f02b49a6008ecb2a7c4a5, type: 2}
+  handPoseList: []
+  blendShapeList: []
+--- !u!114 &2110778821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 162860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdea8c03d8fc2ee47b244398208d9b48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  invulernabilityDuration: 0
 --- !u!1 &165894
 GameObject:
   m_ObjectHideFlags: 0
@@ -2950,7 +3161,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 166972}
-  m_LocalRotation: {x: -0.57854766, y: 0.6324858, z: -0.3525135, w: -0.37547135}
+  m_LocalRotation: {x: -0.5785476, y: 0.63248575, z: -0.35251346, w: -0.3754713}
   m_LocalPosition: {x: -5.8011727, y: -4.1914477, z: -7.447154}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -4062,7 +4273,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 431074}
-  - {fileID: 1236540565755418828}
+  - {fileID: 2226998980017267882}
   m_Father: {fileID: 496550}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4855,96 +5066,77 @@ Transform:
   m_Father: {fileID: 487758}
   m_RootOrder: 17
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1236540565755070172
+--- !u!1001 &1409985691
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 470560}
     m_Modifications:
-    - target: {fileID: 138470, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145091783, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_Name
-      value: SM_Wep_GreatSword_01
+      value: GreatSword
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalScale.x
-      value: 99.99997
+      value: 99.99998
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalScale.y
-      value: 99.99997
+      value: 100.000015
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalScale.z
-      value: 99.99997
+      value: 100
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.3
+      value: 0.6
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3
+      value: 2.7
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -9.8
+      value: -2.6
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7071082
+      value: 0.52600497
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.7009577
+      value: -0.4510515
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.0059777102
+      value: 0.44954327
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.0928477
+      value: -0.56372166
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -81.97
+      value: 1.852
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 82.909
+      value: 79.104
       objectReference: {fileID: 0}
-    - target: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
+    - target: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -89.97
+      value: -92.435
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 64091718456069478, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
-  m_SourcePrefab: {fileID: 100100000, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
---- !u!1 &1236540565755206202 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 138470, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
-  m_PrefabInstance: {fileID: 1236540565755070172}
-  m_PrefabAsset: {fileID: 0}
---- !u!65 &108921627174896274
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1236540565755206202}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.072891384, y: 1.520564, z: 0.2489457}
-  m_Center: {x: 0.00000074442596, y: 0.57795596, z: 0.02808309}
---- !u!4 &1236540565755418828 stripped
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
+--- !u!4 &2226998980017267882 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 482832, guid: 630627b9fd11d4340a42d44621ddcfa7, type: 3}
-  m_PrefabInstance: {fileID: 1236540565755070172}
+  m_CorrespondingSourceObject: {fileID: 2226998979145271345, guid: 7ca4f75fcad21cb40bbff180e1e3979e, type: 3}
+  m_PrefabInstance: {fileID: 1409985691}
   m_PrefabAsset: {fileID: 0}

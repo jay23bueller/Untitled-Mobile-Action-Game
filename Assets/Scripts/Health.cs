@@ -21,37 +21,34 @@ public class Health : MonoBehaviour, IDamageable
 
     
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void ApplyDamage(float damageAmount, GameObject other)
     {
         Debug.Log("Attack?");
-        if(!isInvulernable)
+        if(!other.gameObject.CompareTag(gameObject.tag))
         {
-            Debug.Log("Applied " + damageAmount + "!");
-            if(other.GetComponent<PlayerController>() != null)
+            if (!isInvulernable)
             {
-                StartCoroutine(other.GetComponent<PlayerController>().ShakeCameraAndSlowDownTime());
-                GetComponent<EnemyController>().GetStunned(1);
-                GetComponent<Animator>().Play("Base Layer.Hit");
+                Debug.Log("Applied " + damageAmount + "!");
+                if (other.GetComponent<PlayerController>() != null)
+                {
+                    StartCoroutine(other.GetComponent<PlayerController>().ShakeCameraAndSlowDownTime());
+                    GetComponent<Controller>().GetStunned();
+                }
+
+
+
+
+                isInvulernable = true;
+                HitManager.Instance.PlayHitSound();
+
+                if (GetComponent<CharacterController>() != null)
+                    HitManager.Instance.PlaySwordHitEffect(transform.position + (Vector3.up * (GetComponent<CharacterController>().height / 2)));
+                else
+                    HitManager.Instance.PlaySwordHitEffect(transform.position + (Vector3.up * (GetComponent<CapsuleCollider>().height / 2)));
+                StartCoroutine(ResetInvulernability());
             }
-                
-
-                
-            
-            isInvulernable = true;
-            HitManager.Instance.PlayHitSound();
-
-            if (GetComponent<CharacterController>() != null)
-                HitManager.Instance.PlaySwordHitEffect(transform.position + (Vector3.up * (GetComponent<CharacterController>().height / 2)));
-            else
-                HitManager.Instance.PlaySwordHitEffect(transform.position + (Vector3.up * (GetComponent<CapsuleCollider>().height / 2)));
-            StartCoroutine(ResetInvulernability());
         }
+
         
     }
 

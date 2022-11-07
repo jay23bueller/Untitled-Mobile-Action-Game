@@ -31,8 +31,10 @@ tree("Patrol")
 tree("Attack")
 	sequence
 		IsNearPlayer
-		WindupAttack
-		Wait(0.7)
-		Attack
-		Wait(2.0)
+		while not isStunned
+			sequence
+				WindupAttack
+				Wait(0.7)
+				Attack
+				Wait(2.0)
 

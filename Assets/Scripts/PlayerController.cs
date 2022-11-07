@@ -44,6 +44,16 @@ public class PlayerController : Controller
     private float minTimeScale;
 
 
+    [SerializeField]
+    private float standingHeight = 1.72f;
+
+    [SerializeField]
+    private float rollingHeight;
+
+
+
+
+
 
 
     private void OnAnimatorMove()
@@ -90,6 +100,12 @@ public class PlayerController : Controller
 
 
         }
+
+        if(anim.GetBool("dodging"))
+        {
+            ModifyCharacterControllerHeight();
+            anim.ApplyBuiltinRootMotion();
+        }
             
         
         
@@ -99,21 +115,25 @@ public class PlayerController : Controller
     private void Attack()
     {
 
-        if(!anim.GetBool("attack"))
+        if(!anim.GetBool("dodging"))
         {
-
-            anim.Play("Base Layer.Axe_Combo_1");
-            anim.SetInteger("attackNum", 0);
-            anim.SetBool("attack", true);
-        }
-        else
-        {
-            AnimatorStateInfo currentStateInfo = anim.GetCurrentAnimatorStateInfo(0);
-            if(currentStateInfo.IsTag("Attack") && currentStateInfo.normalizedTime > .3f && currentStateInfo.normalizedTime < 1f && anim.GetInteger("attackNum") < 2)
+            if (!anim.GetBool("attack"))
             {
-                nextAttack = true;
+
+                anim.Play("Base Layer.Axe_Combo_1");
+                anim.SetInteger("attackNum", 0);
+                anim.SetBool("attack", true);
+            }
+            else
+            {
+                AnimatorStateInfo currentStateInfo = anim.GetCurrentAnimatorStateInfo(0);
+                if (currentStateInfo.IsTag("Attack") && currentStateInfo.normalizedTime > .3f && currentStateInfo.normalizedTime < 1f && anim.GetInteger("attackNum") < 2)
+                {
+                    nextAttack = true;
+                }
             }
         }
+
 
 
 
@@ -129,8 +149,7 @@ public class PlayerController : Controller
         }
         else
         {
-            anim.SetBool("attack", false);
-            anim.SetInteger("attackNum", 0);
+            ResetAttack();
             anim.Play("Base Layer.Idle");
             weapon.EnableDamage(false);
         }
@@ -140,6 +159,47 @@ public class PlayerController : Controller
 
     }
 
+    private void ResetAttack()
+    {
+        anim.SetBool("attack", false);
+        anim.SetInteger("attackNum", 0);
+
+    }    
+    
+    private void Dodge()
+    {
+        if (!anim.GetBool("dodging"))
+        {
+            Vector3 movementInput = CalculateMovementInputRelativeToCamera();
+            transform.forward = movementInput.magnitude > 0f ? movementInput : transform.forward;
+            controller.height = rollingHeight;
+            anim.Play("Base Layer.Dodge");
+            anim.SetBool("dodging", true);
+            ResetAttack();
+            ResetWeaponTrailAndDamage();
+        }
+ 
+    }
+
+    private void ResetAnimationValues()
+    {
+        if (anim.GetBool("dodging"))
+            ResetDodge();
+
+        if (anim.GetBool("attack"))
+            ResetAttack();
+    }
+
+    private void ResetDodge()
+    {
+        anim.SetBool("dodging", false);
+        controller.height = standingHeight;
+    }
+
+    private void ModifyCharacterControllerHeight()
+    {
+        controller.height = anim.GetFloat("height") * standingHeight;
+    }
 
     private void Awake()
     {
@@ -152,6 +212,7 @@ public class PlayerController : Controller
         base.OnAwake();
         inputActions = new PlayerInputActions();
         inputActions.Player.Attack.performed += _ => { Attack(); };
+        inputActions.Player.Dodge.performed += _ => { Dodge(); };
         controller = GetComponent<CharacterController>();
     }    
 
@@ -167,16 +228,22 @@ public class PlayerController : Controller
 
     }
 
+    private Vector3 CalculateMovementInputRelativeToCamera()
+    {
+        Vector3 movementInput = new Vector3(inputActions.Player.Walk.ReadValue<Vector2>().x, 0f, inputActions.Player.Walk.ReadValue<Vector2>().y);
+        movementInput = Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * movementInput;
+
+        return movementInput;
+    }
+
     private void MovePlayer()
     {
         
-        if(!anim.GetBool("attack"))
+        if(!anim.GetBool("attack") && !anim.GetBool("dodging"))
         {
-            Vector3 movementInput = new Vector3(inputActions.Player.Walk.ReadValue<Vector2>().x, 0f, inputActions.Player.Walk.ReadValue<Vector2>().y);
+            Vector3 movementInput = CalculateMovementInputRelativeToCamera();
 
             anim.SetFloat("velocity", movementInput.magnitude);
-
-            movementInput = Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * movementInput;
 
             transform.forward = Vector3.Slerp(transform.forward, movementInput, .1f);
 

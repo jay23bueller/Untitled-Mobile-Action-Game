@@ -8,6 +8,8 @@ public class Controller : MonoBehaviour
     protected Weapon weapon;
     [Task]
     protected bool isStunned;
+    [SerializeField]
+    protected float stunDuration;
   
     protected Animator anim;
 
@@ -29,8 +31,7 @@ public class Controller : MonoBehaviour
 
     protected void EnableWeaponTrail(int value)
     {
-        if (weapon.GetComponent<TrailRenderer>() != null)
-            weapon.GetComponent<TrailRenderer>().enabled = value == 1 ? true : false;
+        weapon.EnableWeaponTrail(value == 1 ? true : false);
     }
 
 
@@ -39,8 +40,34 @@ public class Controller : MonoBehaviour
         weapon.EnableDamage(value == 1 ? true : false);
     }
 
-    public void GetStunned(int value)
+    protected void ResetWeaponTrailAndDamage()
     {
-        isStunned = value == 1 ? true : false;
+        EnableWeaponTrail(0);
+        EnableEquippedWeaponDamage(0);
+    }
+
+    public void GetStunned()
+    {
+        if(!isStunned)
+        {
+            isStunned = true;
+            Stun();
+            StartCoroutine(ResetStun());
+        }
+
+    }
+
+    public void Stun()
+    {
+        anim.Play("Base Layer.Hit");
+        ResetWeaponTrailAndDamage();
+        
+    }
+
+    private IEnumerator ResetStun()
+    {
+        yield return new WaitForSecondsRealtime(stunDuration);
+
+        isStunned = false;
     }
 }

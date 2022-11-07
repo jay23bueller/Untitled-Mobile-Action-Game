@@ -48649,7 +48649,7 @@ AnimationClip:
     floatParameter: 0
     intParameter: 1
     messageOptions: 0
-  - time: 0.21666667
+  - time: 0.38333333
     functionName: EnableWeaponTrail
     data: 
     objectReferenceParameter: {fileID: 0}
