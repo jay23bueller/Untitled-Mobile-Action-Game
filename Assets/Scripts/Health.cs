@@ -12,10 +12,7 @@ public class Health : MonoBehaviour, IDamageable
     private bool isInvulernable;
     [SerializeField]
     private float invulernabilityDuration = .5f;
-    [SerializeField]
-    private ParticleSystem hurtParticleSystem;
-    [SerializeField]
-    private AudioClip hurtAudioClip;
+
 
     void Awake()
     {
@@ -36,7 +33,16 @@ public class Health : MonoBehaviour, IDamageable
         if(!isInvulernable)
         {
             Debug.Log("Applied " + damageAmount + "!");
-            StartCoroutine(other.GetComponent<PlayerController>().ShakeCameraAndSlowDownTime());
+            if(other.GetComponent<PlayerController>() != null)
+            {
+                StartCoroutine(other.GetComponent<PlayerController>().ShakeCameraAndSlowDownTime());
+                GetComponent<EnemyController>().GetStunned(1);
+                GetComponent<Animator>().Play("Base Layer.Hit");
+            }
+                
+
+                
+            
             isInvulernable = true;
             HitManager.Instance.PlayHitSound();
 

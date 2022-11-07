@@ -48649,6 +48649,13 @@ AnimationClip:
     floatParameter: 0
     intParameter: 1
     messageOptions: 0
+  - time: 0.21666667
+    functionName: EnableWeaponTrail
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 1
+    messageOptions: 0
   - time: 0.43333334
     functionName: PlayEquippedWeaponSound
     data: 
@@ -48658,6 +48665,13 @@ AnimationClip:
     messageOptions: 0
   - time: 0.6333333
     functionName: EnableEquippedWeaponDamage
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.6333333
+    functionName: EnableWeaponTrail
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

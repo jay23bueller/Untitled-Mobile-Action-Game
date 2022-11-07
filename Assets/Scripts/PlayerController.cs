@@ -5,7 +5,7 @@ using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : Controller
 {
 
     private PlayerInputActions inputActions;
@@ -30,8 +30,9 @@ public class PlayerController : MonoBehaviour
     private bool nextAttack = false;
     [SerializeField]
     private float minDistanceFromEnemy;
-    private Weapon playerWeapon;
 
+
+    // Camera Related Parameters
     [SerializeField]
     private CinemachineFreeLook freeLookCam;
     [SerializeField]
@@ -57,12 +58,6 @@ public class PlayerController : MonoBehaviour
                 transform.forward = attackDirection.magnitude  == 0 ? transform.forward : Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * attackDirection;
 
 
-                //Physics.CapsuleCast(
-                //(controller.center + transform.position) + (transform.right * -5f),
-                //(controller.center + transform.position) + (transform.right * 5f),
-                //capsuleCastRadius,
-                //transform.forward,
-                //out hit, attackRange, LayerMask.GetMask("Enemy"));
 
                 Physics.SphereCast(transform.position + controller.center, castRadius, transform.forward, out hit, attackRange, LayerMask.GetMask("Enemy"));
 
@@ -137,7 +132,7 @@ public class PlayerController : MonoBehaviour
             anim.SetBool("attack", false);
             anim.SetInteger("attackNum", 0);
             anim.Play("Base Layer.Idle");
-            playerWeapon.EnableDamage(false);
+            weapon.EnableDamage(false);
         }
 
         justHit = false;
@@ -148,13 +143,18 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        inputActions = new PlayerInputActions();
-        inputActions.Player.Attack.performed += _ =>{ Attack(); };
-        controller = GetComponent<CharacterController>();
-        anim = GetComponent<Animator>();
-        playerWeapon = GetComponentInChildren<Weapon>();
+        OnAwake();
 
     }
+
+    protected override void OnAwake()
+    {
+        base.OnAwake();
+        inputActions = new PlayerInputActions();
+        inputActions.Player.Attack.performed += _ => { Attack(); };
+        controller = GetComponent<CharacterController>();
+        anim = GetComponent<Animator>();
+    }    
 
     private void OnEnable()
     {
@@ -181,7 +181,6 @@ public class PlayerController : MonoBehaviour
 
             transform.forward = Vector3.Slerp(transform.forward, movementInput, .1f);
 
-            //transform.forward = movementInput.magnitude != 0 ? movementInput : transform.forward;
 
             controller.Move(movementInput * movementSpeed * Time.deltaTime);
         }
@@ -209,16 +208,7 @@ public class PlayerController : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    private void PlayEquippedWeaponSound()
-    {
-        playerWeapon.PlayWeaponSwingSound();
-    }
 
-
-    private void EnableEquippedWeaponDamage(int value)
-    {
-        playerWeapon.EnableDamage(value == 1 ? true : false);
-    }
 
 
 

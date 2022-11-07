@@ -40,7 +40,7 @@ public class Weapon : MonoBehaviour
             Debug.Log(other.name);
             if (other.GetComponent<IDamageable>() != null)
             {
-                other.gameObject.GetComponent<IDamageable>().ApplyDamage(damageAmount, GetComponentInParent<PlayerController>().gameObject);
+                other.gameObject.GetComponent<IDamageable>().ApplyDamage(damageAmount, GetComponentInParent<Health>().gameObject);
 
             }
                 

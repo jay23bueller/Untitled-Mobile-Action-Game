@@ -6,7 +6,7 @@ using Panda;
 using Unity.PlasticSCM.Editor.WebApi;
 using Unity.VisualScripting;
 
-public class EnemyController : MonoBehaviour
+public class EnemyController : Controller
 {
     private NavMeshAgent agent;
     private GameObject player;
@@ -20,11 +20,17 @@ public class EnemyController : MonoBehaviour
 
     private void Awake()
     {
+        OnAwake();
+
+    }
+
+    protected override void OnAwake()
+    {
+        base.OnAwake();
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
         agent.destination = waypoints[waypointIdx].position;
         vision = GetComponentInChildren<EnemyVision>();
-
     }
 
     private void Start()

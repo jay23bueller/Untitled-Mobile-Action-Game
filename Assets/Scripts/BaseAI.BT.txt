@@ -1,8 +1,10 @@
 tree("Root")
-	race
-		tree("Attack")
-		tree("Chase")
-		tree("Patrol")
+	sequence
+		not isStunned
+		race
+			tree("Attack")
+			tree("Chase")
+			tree("Patrol")
 		
 		
 

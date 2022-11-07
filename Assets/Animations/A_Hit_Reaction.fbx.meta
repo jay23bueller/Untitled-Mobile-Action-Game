@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: bc7b09b42a98ef54686e405ca41aeafe
+guid: eb8f79d76165473438ad038d33a0152b
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable:
   - first:
       74: -203655887218126122
-    second: A_GreatSword_Slash
+    second: A_Hit_Reaction
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -30,7 +30,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 1
+    animationCompression: 3
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -39,11 +39,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: A_GreatSword_Slash
+      name: A_Hit_Reaction
       takeName: mixamo.com
       internalID: 0
       firstFrame: 0
-      lastFrame: 76
+      lastFrame: 73
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -55,7 +55,7 @@ ModelImporter:
       loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 1
-      keepOriginalOrientation: 1
+      keepOriginalOrientation: 0
       keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
       heightFromFeet: 0
@@ -63,36 +63,8 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.120839715
-        functionName: EnableWeaponTrail
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: d13a9abe2a4a5594abbdacf7c96ed86a, type: 3}
-        floatParameter: 0
-        intParameter: 1
-        messageOptions: 0
-      - time: 0.13876086
-        functionName: EnableEquippedWeaponDamage
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: d13a9abe2a4a5594abbdacf7c96ed86a, type: 3}
-        floatParameter: 0
-        intParameter: 1
-        messageOptions: 0
-      - time: 0.3179723
-        functionName: PlayEquippedWeaponSound
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: d13a9abe2a4a5594abbdacf7c96ed86a, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.6075584
-        functionName: EnableWeaponTrail
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: d13a9abe2a4a5594abbdacf7c96ed86a, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.62007165
-        functionName: EnableEquippedWeaponDamage
+      - time: 0.9784946
+        functionName: GetStunned
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: d13a9abe2a4a5594abbdacf7c96ed86a, type: 3}
         floatParameter: 0
