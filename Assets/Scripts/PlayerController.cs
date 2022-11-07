@@ -10,7 +10,6 @@ public class PlayerController : Controller
 
     private PlayerInputActions inputActions;
     private CharacterController controller;
-    private Animator anim;
 
 
     //Movement Related Parameters
@@ -27,6 +26,7 @@ public class PlayerController : Controller
     private bool justHit = false;
     private Vector3 attackVelocity;
     private Vector3 playerToEnemyDirection;
+    private Vector3 lastKnownEnemyPosition;
     private bool nextAttack = false;
     [SerializeField]
     private float minDistanceFromEnemy;
@@ -68,7 +68,7 @@ public class PlayerController : Controller
                 if (hit.collider != null)
                 {
                     playerToEnemyDirection = (hit.collider.transform.position - transform.position);
-                    
+                    lastKnownEnemyPosition = hit.collider.transform.position;
 
                     Debug.DrawLine(transform.position + controller.center, hit.collider.transform.position + controller.center, Color.red, 2f);
                     attackVelocity = playerToEnemyDirection / (anim.GetCurrentAnimatorStateInfo(0).length - (anim.GetCurrentAnimatorStateInfo(0).length*.5f));
@@ -80,7 +80,7 @@ public class PlayerController : Controller
             }
 
 
-            if(justHit && hit.collider != null && Vector3.Distance(transform.position, hit.transform.position) > minDistanceFromEnemy)
+            if(justHit && hit.collider != null && Vector3.Distance(transform.position, lastKnownEnemyPosition) > minDistanceFromEnemy)
             {
                 transform.forward = playerToEnemyDirection.normalized;
                 controller.Move(attackVelocity * Time.deltaTime);
@@ -153,7 +153,6 @@ public class PlayerController : Controller
         inputActions = new PlayerInputActions();
         inputActions.Player.Attack.performed += _ => { Attack(); };
         controller = GetComponent<CharacterController>();
-        anim = GetComponent<Animator>();
     }    
 
     private void OnEnable()

@@ -4955,7 +4955,8 @@ MonoBehaviour:
   playerTransform: {fileID: 0}
   maxDistance: 15
   minHeight: 0
-  viewingAngle: 100
+  initialViewingAngle: 90
+  inSightViewingAngle: 120
   playerIsInSight: 0
   chasingPlayer: 0
 --- !u!1 &8077014096231747131

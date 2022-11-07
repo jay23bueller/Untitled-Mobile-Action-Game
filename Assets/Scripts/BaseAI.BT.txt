@@ -23,10 +23,9 @@ tree("Patrol")
 			SetDestination
 		sequence 
 			HasArrivedAtDestination
-			repeat(20)
-				while not HasLineOfSight
-					Wait(0.1)
-			ResetDestination
+			fallback
+				WaitUnlessPlayerInSight(2.0)
+				ResetDestination
 
 
 tree("Attack")

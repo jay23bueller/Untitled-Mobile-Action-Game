@@ -9,11 +9,9 @@ using Unity.VisualScripting;
 public class EnemyController : Controller
 {
     private NavMeshAgent agent;
-    private GameObject player;
     [SerializeField]
     private Transform[] waypoints;
     private int waypointIdx;
-    private Animator anim;
     private bool DestinationSet;
     private EnemyVision vision;
   
@@ -28,7 +26,6 @@ public class EnemyController : Controller
     {
         base.OnAwake();
         agent = GetComponent<NavMeshAgent>();
-        anim = GetComponent<Animator>();
         agent.destination = waypoints[waypointIdx].position;
         vision = GetComponentInChildren<EnemyVision>();
     }
@@ -159,13 +156,33 @@ public class EnemyController : Controller
     [Task]
     private void WaitUnlessPlayerInSight(float duration)
     {
-        while(!vision.HasLineOfSight() && duration > 0f)
+
+        if(ThisTask.isStarting)
         {
-            Debug.Log("Waiting for " + duration);
-            duration -= Time.deltaTime;
-            
+            PlayerInSightTimer inSightTimer = new PlayerInSightTimer();
+            inSightTimer.startTime = Time.time;
+            inSightTimer.duration = duration;
+            ThisTask.data = inSightTimer;
         }
 
-        ThisTask.Succeed();
+        PlayerInSightTimer pT = ThisTask.GetData<PlayerInSightTimer>();
+
+        float elapsedTime = (Time.time - pT.startTime) / duration;
+        if(vision.HasLineOfSight())
+        {
+            ThisTask.Succeed();
+        }
+        else if (elapsedTime >= 1.0f)
+        {
+            ThisTask.Fail();
+        }
+
+
+    }
+
+    private struct PlayerInSightTimer
+    {
+        public float startTime;
+        public float duration;
     }
 }

@@ -8,10 +8,13 @@ public class Controller : MonoBehaviour
     protected Weapon weapon;
     [Task]
     protected bool isStunned;
+  
+    protected Animator anim;
 
     protected virtual void OnAwake()
     {
         weapon = GetComponentInChildren<Weapon>();
+        anim = GetComponent<Animator>();
     }
 
     private void Awake()

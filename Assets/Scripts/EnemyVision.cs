@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 public class EnemyVision : MonoBehaviour
 {
     public Transform playerTransform;
-
-    
 
     [SerializeField]
     private float maxDistance;
@@ -15,7 +14,10 @@ public class EnemyVision : MonoBehaviour
     private float minHeight;
 
     [SerializeField]
-    private float viewingAngle;
+    private float initialViewingAngle;
+
+    [SerializeField]
+    private float inSightViewingAngle;
 
     public bool playerIsInSight;
 
@@ -45,14 +47,18 @@ public class EnemyVision : MonoBehaviour
             return false;
 
         bool hasLineOfSight = false;
+        float currentViewingAngle = playerIsInSight ? inSightViewingAngle : initialViewingAngle;
+        playerIsInSight = false;
         RaycastHit hit;
 
         Vector3 enemyToPlayerDirection = playerTransform.position - transform.position;
         enemyToPlayerDirection.y = 0f;
         enemyToPlayerDirection = enemyToPlayerDirection.normalized;
         float dotProduct = Vector3.Dot(transform.forward, enemyToPlayerDirection);
-        
-        if (dotProduct >= Mathf.Cos(viewingAngle/2))
+
+
+
+        if (dotProduct >= Mathf.Cos(currentViewingAngle/2))
         {
             Debug.Log(dotProduct);
             Physics.Raycast(transform.position, enemyToPlayerDirection, out hit, maxDistance);
