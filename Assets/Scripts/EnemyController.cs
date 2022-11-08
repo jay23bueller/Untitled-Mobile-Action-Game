@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using Panda;
-using Unity.PlasticSCM.Editor.WebApi;
-using Unity.VisualScripting;
 
 public class EnemyController : Controller
 {
+    [SerializeField]
+    private float distanceToPlayer = 2f;
     private NavMeshAgent agent;
     [SerializeField]
     private Transform[] waypoints;
     private int waypointIdx;
     private bool DestinationSet;
     private EnemyVision vision;
+
+    [Task]
+    private bool playerWasSeen;
   
 
     private void Awake()
@@ -100,9 +103,31 @@ public class EnemyController : Controller
     }
 
     [Task]
+    private bool WasPlayerSeenLastFrame()
+    {
+        return vision.GetPlayerWasSeenLastFrame();
+    }
+
+    [Task]
+    private void GoToLastKnownPlayerPositionWhileSeekingPlayer()
+    {
+        if(ThisTask.isStarting)
+        {
+            agent.SetDestination(vision.PlayerPosition);
+        } 
+        else if( Vector3.Distance(transform.position, agent.destination) < distanceToPlayer)
+        {
+            ThisTask.Succeed();
+        }
+    }
+
+
+    [Task]
     private bool HasLineOfSight()
     {
-        return vision.HasLineOfSight();
+        bool seen = vision.HasLineOfSight();
+        playerWasSeen = seen;
+        return seen;
     }
 
     [Task]
@@ -114,21 +139,23 @@ public class EnemyController : Controller
     [Task]
     private void WindupAttack()
     {
-        anim.Play("Base Layer.Windup");
+        anim.CrossFade("Base Layer.Windup",.2f);
+        //anim.Play("Base Layer.Windup");
         ThisTask.Succeed();
     }
 
     [Task]
     private void Attack()
     {
-        anim.Play("Base Layer.Slash");
+        anim.CrossFade("Base Layer.Slash", .2f);
+        //anim.Play("Base Layer.Slash");
         ThisTask.Succeed();
     }
 
     [Task]
     private bool IsNearPlayer()
     {
-        if (vision.playerTransform != null && Vector3.Distance(vision.playerTransform.position, transform.position) < 2f)
+        if (vision.playerTransform != null && Vector3.Distance(vision.playerTransform.position, transform.position) < distanceToPlayer)
         {
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
@@ -150,20 +177,39 @@ public class EnemyController : Controller
     }
 
     [Task]
+    private void LookAtPlayerWhileWindingUp(float duration)
+    {
+        if(ThisTask.isStarting)
+        {
+            PTaskTimer windupTimer = new PTaskTimer(Time.time, duration);
+            ThisTask.data = windupTimer;
+        }
+
+        PTaskTimer wT = ThisTask.GetData<PTaskTimer>();
+
+        if (wT.GetElapsedTime() >= 1.0f)
+            ThisTask.Succeed();
+
+
+        if(vision.playerIsInSight)
+        {
+            transform.LookAt(vision.playerTransform.position, Vector3.up);
+        }
+    }
+
+    [Task]
     private void WaitUnlessPlayerInSight(float duration)
     {
 
         if(ThisTask.isStarting)
         {
-            PlayerInSightTimer inSightTimer = new PlayerInSightTimer();
-            inSightTimer.startTime = Time.time;
-            inSightTimer.duration = duration;
+            PTaskTimer inSightTimer = new PTaskTimer(Time.time, duration);
             ThisTask.data = inSightTimer;
         }
 
-        PlayerInSightTimer pT = ThisTask.GetData<PlayerInSightTimer>();
+        PTaskTimer pT = ThisTask.GetData<PTaskTimer>();
 
-        float elapsedTime = (Time.time - pT.startTime) / duration;
+        float elapsedTime = pT.GetElapsedTime();
         if(vision.HasLineOfSight())
         {
             ThisTask.Succeed();
@@ -176,9 +222,20 @@ public class EnemyController : Controller
 
     }
 
-    private struct PlayerInSightTimer
+    private struct PTaskTimer
     {
-        public float startTime;
-        public float duration;
+        public PTaskTimer(float startTime, float duration)
+        {
+            this.startTime = startTime;
+            this.duration = duration;
+        }
+
+        public float GetElapsedTime()
+        {
+
+            return (Time.time - startTime)/duration;
+        }
+        private float startTime;
+        private float duration;
     }
 }

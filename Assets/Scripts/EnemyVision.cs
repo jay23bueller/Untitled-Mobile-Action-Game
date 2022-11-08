@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
@@ -23,6 +24,17 @@ public class EnemyVision : MonoBehaviour
 
     public bool chasingPlayer;
 
+    private bool hasLineOfSight;
+
+    private bool playerWasSeenLastFrame;
+
+    private Vector3 _playerPosition;
+
+    public Vector3 PlayerPosition
+    {
+        get => _playerPosition;
+    }
+
     // Start is called before the first frame update
     private void OnTriggerEnter(Collider other)
     {
@@ -40,13 +52,20 @@ public class EnemyVision : MonoBehaviour
         }
     }
 
+    public bool GetPlayerWasSeenLastFrame()
+    {
+        return playerWasSeenLastFrame;
+    }
+
 
     public bool HasLineOfSight()
     {
         if (playerTransform == null)
             return false;
 
-        bool hasLineOfSight = false;
+        playerWasSeenLastFrame = hasLineOfSight;  
+            
+        hasLineOfSight = false;
         float currentViewingAngle = playerIsInSight ? inSightViewingAngle : initialViewingAngle;
         playerIsInSight = false;
         RaycastHit hit;
@@ -66,6 +85,7 @@ public class EnemyVision : MonoBehaviour
             if (hit.collider != null && hit.collider.gameObject == playerTransform.gameObject)
             {
                 hasLineOfSight = true;
+                _playerPosition = hit.collider.transform.position;
                 playerIsInSight = true;
             }
         }

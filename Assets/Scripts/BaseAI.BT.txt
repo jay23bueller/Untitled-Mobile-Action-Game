@@ -1,17 +1,23 @@
 tree("Root")
 	sequence
 		not isStunned
-		race
+		fallback
 			tree("Attack")
 			tree("Chase")
+			tree("Find")
 			tree("Patrol")
 		
-		
+tree("Find")
+	sequence
+		WasPlayerSeenLastFrame
+		GoToLastKnownPlayerPositionWhileSeekingPlayer
+		WaitUnlessPlayerInSight(2.0)
 
 tree("Chase")
 	sequence
 		HasLineOfSight
 		ChasePlayer
+
 
 
 tree("Patrol")
@@ -34,7 +40,8 @@ tree("Attack")
 		while not isStunned
 			sequence
 				WindupAttack
-				Wait(0.7)
+				LookAtPlayerWhileWindingUp(.7)
 				Attack
 				Wait(2.0)
+
 
