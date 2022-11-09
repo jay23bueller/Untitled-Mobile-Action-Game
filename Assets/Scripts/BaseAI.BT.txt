@@ -9,14 +9,14 @@ tree("Root")
 		
 tree("Find")
 	sequence
+		not IsChasingPlayer
+		not IsNearPlayer
 		WasPlayerSeenLastFrame
 		GoToLastKnownPlayerPositionWhileSeekingPlayer
 		WaitUnlessPlayerInSight(2.0)
 
 tree("Chase")
-	sequence
-		HasLineOfSight
-		ChasePlayer
+	ChasePlayer
 
 
 

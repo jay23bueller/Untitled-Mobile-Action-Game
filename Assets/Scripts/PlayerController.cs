@@ -1,4 +1,5 @@
 using Cinemachine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Animations;
@@ -68,14 +69,13 @@ public class PlayerController : Controller
                 transform.forward = attackDirection.magnitude  == 0 ? transform.forward : Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * attackDirection;
 
 
-
-                Physics.SphereCast(transform.position + controller.center, castRadius, transform.forward, out hit, attackRange, LayerMask.GetMask("Enemy"));
-
-                
+                Physics.SphereCast(transform.position + controller.center, castRadius, transform.forward, out hit, attackRange);
 
 
-                
-                if (hit.collider != null)
+
+
+
+                if (hit.collider != null && hit.collider.CompareTag("Enemy"))
                 {
                     playerToEnemyDirection = (hit.collider.transform.position - transform.position);
                     lastKnownEnemyPosition = hit.collider.transform.position;
@@ -90,10 +90,21 @@ public class PlayerController : Controller
             }
 
 
-            if(justHit && hit.collider != null && Vector3.Distance(transform.position, lastKnownEnemyPosition) > minDistanceFromEnemy)
+
+            if(justHit && hit.collider != null)
             {
+                playerToEnemyDirection.y = 0f;
                 transform.forward = playerToEnemyDirection.normalized;
-                controller.Move(attackVelocity * Time.deltaTime);
+                if (Vector3.Distance(transform.position, lastKnownEnemyPosition) > minDistanceFromEnemy)
+                {
+                    
+                    controller.Move(attackVelocity * Time.deltaTime);
+                }
+                //else if(Vector3.Distance(transform.position, lastKnownEnemyPosition) < minDistanceFromEnemy)
+                //{
+                //    controller.Move(-attackVelocity * Time.deltaTime);
+                //}
+                
             }
 
             
@@ -112,6 +123,7 @@ public class PlayerController : Controller
     }
 
 
+
     private void Attack()
     {
 
@@ -120,7 +132,7 @@ public class PlayerController : Controller
             if (!anim.GetBool("attack"))
             {
 
-                anim.Play("Base Layer.Axe_Combo_1");
+                anim.Play(animNameToId["Base Layer.Axe_Combo_1"]);
                 anim.SetInteger("attackNum", 0);
                 anim.SetBool("attack", true);
             }
@@ -150,7 +162,7 @@ public class PlayerController : Controller
         else
         {
             ResetAttack();
-            anim.Play("Base Layer.Idle");
+            anim.Play(animNameToId["Base Layer.Idle_Walk_Run"]);
             weapon.EnableDamage(false);
         }
 
@@ -170,10 +182,11 @@ public class PlayerController : Controller
     {
         if (!anim.GetBool("dodging"))
         {
-            Vector3 movementInput = CalculateMovementInputRelativeToCamera();
+            Vector3 movementInput = new Vector3(); 
+            CalculateMovementInputRelativeToCamera(ref movementInput);
             transform.forward = movementInput.magnitude > 0f ? movementInput : transform.forward;
             controller.height = rollingHeight;
-            anim.Play("Base Layer.Dodge");
+            anim.Play(animNameToId["Base Layer.Dodge"]);
             anim.SetBool("dodging", true);
             ResetAttack();
             ResetWeaponTrailAndDamage();
@@ -224,33 +237,44 @@ public class PlayerController : Controller
     // Update is called once per frame
     void Update()
     {
-        MovePlayer();
+        Vector3 movementInput = new Vector3();
+        MovePlayer(ref movementInput);
+        ApplyGravity(ref movementInput);
+
+        controller.Move(movementInput * Time.deltaTime);
+        anim.SetFloat("velocity", controller.velocity.magnitude);
 
     }
 
-    private Vector3 CalculateMovementInputRelativeToCamera()
+    private void CalculateMovementInputRelativeToCamera(ref Vector3 movementInput)
     {
-        Vector3 movementInput = new Vector3(inputActions.Player.Walk.ReadValue<Vector2>().x, 0f, inputActions.Player.Walk.ReadValue<Vector2>().y);
+       Vector2 input = inputActions.Player.Walk.ReadValue<Vector2>();
+        movementInput.x = input.x;
+        movementInput.z = input.y;
         movementInput = Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * movementInput;
 
-        return movementInput;
+
     }
 
-    private void MovePlayer()
+    private void MovePlayer(ref Vector3 movementInput)
     {
         
         if(!anim.GetBool("attack") && !anim.GetBool("dodging"))
         {
-            Vector3 movementInput = CalculateMovementInputRelativeToCamera();
-
-            anim.SetFloat("velocity", movementInput.magnitude);
+            CalculateMovementInputRelativeToCamera(ref movementInput);
 
             transform.forward = Vector3.Slerp(transform.forward, movementInput, .1f);
 
+            movementInput = movementInput * movementSpeed;
 
-            controller.Move(movementInput * movementSpeed * Time.deltaTime);
         }
 
+    }
+
+    private void ApplyGravity(ref Vector3 movementInput)
+    {
+        if (!controller.isGrounded)
+            movementInput.y = -9.8f;
     }
 
     public IEnumerator ShakeCameraAndSlowDownTime()

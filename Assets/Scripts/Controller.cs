@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Panda;
+using System;
 
 public class Controller : MonoBehaviour
 {
@@ -10,6 +11,11 @@ public class Controller : MonoBehaviour
     protected bool isStunned;
     [SerializeField]
     protected float stunDuration;
+
+    [SerializeField]
+    protected string[] animationNames;
+
+    protected Dictionary<string, int> animNameToId;
   
     protected Animator anim;
 
@@ -17,6 +23,14 @@ public class Controller : MonoBehaviour
     {
         weapon = GetComponentInChildren<Weapon>();
         anim = GetComponent<Animator>();
+        animNameToId = new Dictionary<string, int>();
+        if(animationNames.Length > 0)
+        {
+            foreach(string animationName in animationNames)
+            {
+                animNameToId.Add(animationName, Animator.StringToHash(animationName));
+            }
+        }
     }
 
     private void Awake()
@@ -57,9 +71,9 @@ public class Controller : MonoBehaviour
 
     }
 
-    public void Stun()
+    protected virtual void Stun()
     {
-        anim.Play("Base Layer.Hit");
+        anim.Play(animNameToId["Base Layer.Hit"]);
         ResetWeaponTrailAndDamage();
         
     }

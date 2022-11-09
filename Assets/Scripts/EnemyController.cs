@@ -79,26 +79,47 @@ public class EnemyController : Controller
         
         if(Vector3.Distance(agent.transform.position, waypoints[waypointIdx].position) < .2f)
             return true;
+
+        ThisTask.debugInfo = "Is going to place?";
         
         return false;
 
+    }
+
+    protected override void Stun()
+    {
+        base.Stun();
+        agent.isStopped = true;
     }
 
 
     [Task]
     private void ChasePlayer()
     {
-        if(vision.playerTransform != null)
+        
+        if(vision.HasLineOfSight())
         {
             agent.SetDestination(vision.playerTransform.position);
             agent.speed = 6f;
             DestinationSet = false;
             vision.chasingPlayer = true;
+            ThisTask.debugInfo = "Seeking player in sight";
 
-            ThisTask.Succeed();
+            if (Vector3.Distance(agent.transform.position, agent.destination) < distanceToPlayer)
+            {
+                Debug.Log("at the place");
+                vision.chasingPlayer = false;
+                ThisTask.Succeed();
+            }
+
+        }
+        else
+        {
+            vision.chasingPlayer = false;
+            ThisTask.Fail();
         }
 
-        ThisTask.Fail();
+  
 
     }
 
@@ -115,7 +136,7 @@ public class EnemyController : Controller
         {
             agent.SetDestination(vision.PlayerPosition);
         } 
-        else if( Vector3.Distance(transform.position, agent.destination) < distanceToPlayer)
+        else if( (Vector3.Distance(transform.position, agent.destination) < distanceToPlayer) || vision.playerIsInSight)
         {
             ThisTask.Succeed();
         }
@@ -139,23 +160,22 @@ public class EnemyController : Controller
     [Task]
     private void WindupAttack()
     {
-        anim.CrossFade("Base Layer.Windup",.2f);
-        //anim.Play("Base Layer.Windup");
+        anim.CrossFade(animNameToId["Base Layer.Windup"],.2f);
         ThisTask.Succeed();
     }
 
     [Task]
     private void Attack()
     {
-        anim.CrossFade("Base Layer.Slash", .2f);
-        //anim.Play("Base Layer.Slash");
+        anim.CrossFade(animNameToId["Base Layer.Slash"], .2f);
         ThisTask.Succeed();
     }
 
     [Task]
     private bool IsNearPlayer()
     {
-        if (vision.playerTransform != null && Vector3.Distance(vision.playerTransform.position, transform.position) < distanceToPlayer)
+        ThisTask.debugInfo = vision.playerTransform != null ? "Distance to player" + Vector3.Distance(transform.position, vision.playerTransform.position) : "Player not set";
+        if (vision.playerTransform != null && vision.playerIsInSight && Vector3.Distance(vision.playerTransform.position, transform.position) < distanceToPlayer)
         {
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
@@ -172,7 +192,7 @@ public class EnemyController : Controller
 
     private void ResumeMovement()
     {
-        anim.Play("Base Layer.Idle");
+        anim.Play(animNameToId["Base Layer.Idle_Walk_Run"]);
         agent.isStopped = false;
     }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -79,14 +80,20 @@ public class EnemyVision : MonoBehaviour
 
         if (dotProduct >= Mathf.Cos(currentViewingAngle/2))
         {
-            Debug.Log(dotProduct);
-            Physics.Raycast(transform.position, enemyToPlayerDirection, out hit, maxDistance);
 
-            if (hit.collider != null && hit.collider.gameObject == playerTransform.gameObject)
+            Physics.Raycast(transform.position, enemyToPlayerDirection, out hit, maxDistance, ~LayerMask.GetMask("Ignore Vision"));
+
+            if (hit.collider != null && hit.collider.CompareTag("Player"))
             {
+
                 hasLineOfSight = true;
                 _playerPosition = hit.collider.transform.position;
                 playerIsInSight = true;
+            }
+            else
+            {
+                if (hit.collider != null)
+                    Debug.Log(hit.collider.tag);
             }
         }
 
