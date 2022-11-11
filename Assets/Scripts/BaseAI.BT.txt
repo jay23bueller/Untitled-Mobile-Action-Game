@@ -11,9 +11,11 @@ tree("Find")
 	sequence
 		not IsChasingPlayer
 		not IsNearPlayer
-		WasPlayerSeenLastFrame
+		fallback
+			WasPlayerSeenLastFrame
+			WasPlayerHeard
 		GoToLastKnownPlayerPositionWhileSeekingPlayer
-		WaitUnlessPlayerInSight(2.0)
+		WaitUnlessPlayerSensed(2.0)
 
 tree("Chase")
 	ChasePlayer
@@ -30,7 +32,7 @@ tree("Patrol")
 		sequence 
 			HasArrivedAtDestination
 			fallback
-				WaitUnlessPlayerInSight(2.0)
+				WaitUnlessPlayerSensed(2.0)
 				ResetDestination
 
 

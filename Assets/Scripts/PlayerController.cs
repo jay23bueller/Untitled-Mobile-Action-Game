@@ -13,9 +13,6 @@ public class PlayerController : Controller
     private CharacterController controller;
 
 
-    //Movement Related Parameters
-    [SerializeField]
-    private float movementSpeed;
 
 
     //Attack Related Parameters
@@ -50,6 +47,8 @@ public class PlayerController : Controller
 
     [SerializeField]
     private float rollingHeight;
+
+    private SoundStimuli soundStimuli;
 
 
 
@@ -227,6 +226,7 @@ public class PlayerController : Controller
         inputActions.Player.Attack.performed += _ => { Attack(); };
         inputActions.Player.Dodge.performed += _ => { Dodge(); };
         controller = GetComponent<CharacterController>();
+        soundStimuli = GetComponentInChildren<SoundStimuli>();
     }    
 
     private void OnEnable()
@@ -299,6 +299,16 @@ public class PlayerController : Controller
     }
 
 
+    protected override void PlayFootstepSound(AnimationEvent evt)
+    {
+        base.PlayFootstepSound(evt);
+        float currentVelocity = anim.GetFloat("velocity");
+
+        if (currentVelocity > 0f)
+            soundStimuli.MakeNoise(currentVelocity / movementSpeed);
+            
+        
+    }
 
 
 

@@ -13,6 +13,9 @@ public class Controller : MonoBehaviour
     protected float stunDuration;
 
     [SerializeField]
+    protected float movementSpeed;
+
+    [SerializeField]
     protected string[] animationNames;
 
     protected Dictionary<string, int> animNameToId;
@@ -76,6 +79,21 @@ public class Controller : MonoBehaviour
         anim.Play(animNameToId["Base Layer.Hit"]);
         ResetWeaponTrailAndDamage();
         
+    }
+
+    protected virtual void PlayFootstepSound(AnimationEvent evt)
+    {
+        
+        if (evt.animatorClipInfo.weight > .5f)
+        {
+            bool isRunning = anim.GetFloat("velocity") > .6f * movementSpeed ? true : false;
+
+            HitManager.Instance.PlayFootstepSound(anim.GetBoneTransform(HumanBodyBones.LeftFoot).position, isRunning);
+        }
+        
+
+        
+
     }
 
     private IEnumerator ResetStun()

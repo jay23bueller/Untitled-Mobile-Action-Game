@@ -13,7 +13,7 @@ public class EnemyController : Controller
     private Transform[] waypoints;
     private int waypointIdx;
     private bool DestinationSet;
-    private EnemyVision vision;
+    private EnemyPerception perception;
 
     [Task]
     private bool playerWasSeen;
@@ -29,8 +29,9 @@ public class EnemyController : Controller
     {
         base.OnAwake();
         agent = GetComponent<NavMeshAgent>();
+        agent.speed = movementSpeed;
         agent.destination = waypoints[waypointIdx].position;
-        vision = GetComponentInChildren<EnemyVision>();
+        perception = GetComponentInChildren<EnemyPerception>();
     }
 
 
@@ -97,25 +98,25 @@ public class EnemyController : Controller
     private void ChasePlayer()
     {
         
-        if(vision.HasLineOfSight())
+        if(perception.HasLineOfSight())
         {
-            agent.SetDestination(vision.playerTransform.position);
+            agent.SetDestination(perception.DetectedPosition);
             agent.speed = 6f;
             DestinationSet = false;
-            vision.chasingPlayer = true;
+            perception.chasingPlayer = true;
             ThisTask.debugInfo = "Seeking player in sight";
 
             if (Vector3.Distance(agent.transform.position, agent.destination) < distanceToPlayer)
             {
                 Debug.Log("at the place");
-                vision.chasingPlayer = false;
+                perception.chasingPlayer = false;
                 ThisTask.Succeed();
             }
 
         }
         else
         {
-            vision.chasingPlayer = false;
+            perception.chasingPlayer = false;
             ThisTask.Fail();
         }
 
@@ -126,7 +127,14 @@ public class EnemyController : Controller
     [Task]
     private bool WasPlayerSeenLastFrame()
     {
-        return vision.GetPlayerWasSeenLastFrame();
+        ThisTask.debugInfo = "" + perception.GetPlayerWasSeenLastFrame();
+        return perception.GetPlayerWasSeenLastFrame();
+    }
+
+    [Task]
+    private bool WasPlayerHeard()
+    {
+        return perception.PlayerWasHeard;
     }
 
     [Task]
@@ -134,19 +142,28 @@ public class EnemyController : Controller
     {
         if(ThisTask.isStarting)
         {
-            agent.SetDestination(vision.PlayerPosition);
+            seeking = true;
+            agent.SetDestination(perception.DetectedPosition);
         } 
-        else if( (Vector3.Distance(transform.position, agent.destination) < distanceToPlayer) || vision.playerIsInSight)
+        else if( (Vector3.Distance(transform.position, agent.destination) < distanceToPlayer) || perception.PlayerIsInSight || perception.PlayerWasHeard)
         {
+            seeking = false;
             ThisTask.Succeed();
         }
+    }
+
+    bool seeking;
+    private void OnDrawGizmos()
+    {
+        if (seeking)
+            Gizmos.DrawSphere(perception.DetectedPosition, 2f);
     }
 
 
     [Task]
     private bool HasLineOfSight()
     {
-        bool seen = vision.HasLineOfSight();
+        bool seen = perception.HasLineOfSight();
         playerWasSeen = seen;
         return seen;
     }
@@ -154,7 +171,7 @@ public class EnemyController : Controller
     [Task]
     private bool IsChasingPlayer()
     {
-        return vision.IsChasingPlayer();
+        return perception.IsChasingPlayer();
     }
 
     [Task]
@@ -174,8 +191,8 @@ public class EnemyController : Controller
     [Task]
     private bool IsNearPlayer()
     {
-        ThisTask.debugInfo = vision.playerTransform != null ? "Distance to player" + Vector3.Distance(transform.position, vision.playerTransform.position) : "Player not set";
-        if (vision.playerTransform != null && vision.playerIsInSight && Vector3.Distance(vision.playerTransform.position, transform.position) < distanceToPlayer)
+        ThisTask.debugInfo = perception.PlayerIsInSight != false ? "Distance to player" + Vector3.Distance(transform.position, perception.DetectedPosition) : "Player not set";
+        if (perception.PlayerIsInSight && Vector3.Distance(perception.DetectedPosition, transform.position) < distanceToPlayer)
         {
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
@@ -211,14 +228,14 @@ public class EnemyController : Controller
             ThisTask.Succeed();
 
 
-        if(vision.playerIsInSight)
+        if(perception.HasLineOfSight())
         {
-            transform.LookAt(vision.playerTransform.position, Vector3.up);
+            transform.LookAt(perception.DetectedPosition, Vector3.up);
         }
     }
 
     [Task]
-    private void WaitUnlessPlayerInSight(float duration)
+    private void WaitUnlessPlayerSensed(float duration)
     {
 
         if(ThisTask.isStarting)
@@ -230,7 +247,7 @@ public class EnemyController : Controller
         PTaskTimer pT = ThisTask.GetData<PTaskTimer>();
 
         float elapsedTime = pT.GetElapsedTime();
-        if(vision.HasLineOfSight())
+        if(perception.HasLineOfSight() || perception.PlayerWasHeard)
         {
             ThisTask.Succeed();
         }

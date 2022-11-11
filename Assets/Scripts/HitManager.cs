@@ -2,24 +2,35 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HitManager : MonoBehaviour
+public sealed class HitManager : MonoBehaviour
 {
     [SerializeField]
     private AudioClip hitAudioClip;
 
+    private static HitManager _instance;
+
+    public static HitManager Instance
+    {
+        get { return _instance; }
+    }
 
     private AudioSource hitManagerAudioSource;
 
     [SerializeField]
+    private AudioClip[] walkingFootstepAudioClips;
+
+    [SerializeField]
+    private AudioClip[] runningFootstepAudioClips;
+
+    [SerializeField]
     private GameObject swordHitParticleSystemPrefab;
 
-    public static HitManager Instance;
-    
     private void Awake()
     {
+        _instance = this;
         hitManagerAudioSource = gameObject.AddComponent<AudioSource>();
-        Instance = this;
     }
+
 
     public void PlayHitSound()
     {
@@ -35,4 +46,16 @@ public class HitManager : MonoBehaviour
     {
         Instantiate(swordHitParticleSystemPrefab, hitLocation, Quaternion.identity);
     }
+
+    public void PlayFootstepSound(Vector3 footstepPosition, bool isRunning)
+    {
+        AudioClip selectedAudioClip;
+        if (!isRunning)
+            selectedAudioClip = walkingFootstepAudioClips[Random.Range(0, walkingFootstepAudioClips.Length)];
+        else
+            selectedAudioClip = runningFootstepAudioClips[Random.Range(0, runningFootstepAudioClips.Length)];
+
+        AudioSource.PlayClipAtPoint(selectedAudioClip,footstepPosition);
+    }
+
 }

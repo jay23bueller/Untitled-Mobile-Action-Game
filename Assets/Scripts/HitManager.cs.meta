@@ -3,7 +3,9 @@ guid: 1e189421ec5959348bffb7f43d216358
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - hitAudioClip: {fileID: 8300000, guid: 77308395eaa471b47916fda42ee4fdaa, type: 3}
+  - swordHitParticleSystemPrefab: {fileID: 1620636520166436, guid: 07757cf211bd45044a1f1917658b9e66, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
