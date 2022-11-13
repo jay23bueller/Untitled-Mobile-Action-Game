@@ -5,6 +5,7 @@ using UnityEngine;
 
 public sealed class AIManager
 {
+    #region Variables
     private static AIManager _aiManager;
 
     public static AIManager Instance
@@ -33,4 +34,5 @@ public sealed class AIManager
                 
         }
     }
+    #endregion
 }

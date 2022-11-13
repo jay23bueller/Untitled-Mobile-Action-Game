@@ -2,36 +2,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Panda;
-using System;
 
 public class Controller : MonoBehaviour
 {
-    protected Weapon weapon;
-    [Task]
-    protected bool isStunned;
-    [SerializeField]
-    protected float stunDuration;
+
+
+    #region Variables
+
+    protected const int ANIM_TRUE = 1;
+    protected const int ANIM_FALSE = 0;
+
+    protected Weapon _weapon;
 
     [SerializeField]
-    protected float movementSpeed;
+    protected float _stunDuration;
 
     [SerializeField]
-    protected string[] animationNames;
+    protected float _movementSpeed;
 
-    protected Dictionary<string, int> animNameToId;
+    [SerializeField]
+    protected string[] _animationNames;
+
+    protected Dictionary<string, int> _animToId;
   
-    protected Animator anim;
+    protected Animator _anim;
 
+    #endregion
+    #region Methods
+
+    //Allow child classes to initialize their own items when Awake callback is executed
     protected virtual void OnAwake()
     {
-        weapon = GetComponentInChildren<Weapon>();
-        anim = GetComponent<Animator>();
-        animNameToId = new Dictionary<string, int>();
-        if(animationNames.Length > 0)
+        _weapon = GetComponentInChildren<Weapon>();
+        _anim = GetComponent<Animator>();
+        _animToId = new Dictionary<string, int>();
+        if(_animationNames.Length > 0)
         {
-            foreach(string animationName in animationNames)
+            foreach(string animationName in _animationNames)
             {
-                animNameToId.Add(animationName, Animator.StringToHash(animationName));
+                _animToId.Add(animationName, Animator.StringToHash(animationName));
             }
         }
     }
@@ -43,31 +52,31 @@ public class Controller : MonoBehaviour
 
     protected void PlayEquippedWeaponSound()
     {
-        weapon.PlayWeaponSwingSound();
+        _weapon.PlayWeaponSwingSound();
     }
 
     protected void EnableWeaponTrail(int value)
     {
-        weapon.EnableWeaponTrail(value == 1 ? true : false);
+        _weapon.EnableWeaponTrail(value == ANIM_TRUE ? true : false);
     }
 
 
     protected void EnableEquippedWeaponDamage(int value)
     {
-        weapon.EnableDamage(value == 1 ? true : false);
+        _weapon.EnableDamage(value == ANIM_TRUE ? true : false);
     }
 
     protected void ResetWeaponTrailAndDamage()
     {
-        EnableWeaponTrail(0);
-        EnableEquippedWeaponDamage(0);
+        EnableWeaponTrail(ANIM_FALSE);
+        EnableEquippedWeaponDamage(ANIM_FALSE);
     }
 
     public void GetStunned()
     {
-        if(!isStunned)
+        if(!IsStunned)
         {
-            isStunned = true;
+            IsStunned = true;
             Stun();
             StartCoroutine(ResetStun());
         }
@@ -76,7 +85,7 @@ public class Controller : MonoBehaviour
 
     protected virtual void Stun()
     {
-        anim.Play(animNameToId["Base Layer.Hit"]);
+        _anim.Play(_animToId["Base Layer.Hit"]);
         ResetWeaponTrailAndDamage();
         
     }
@@ -86,9 +95,9 @@ public class Controller : MonoBehaviour
         
         if (evt.animatorClipInfo.weight > .5f)
         {
-            bool isRunning = anim.GetFloat("velocity") > .6f * movementSpeed ? true : false;
-
-            HitManager.Instance.PlayFootstepSound(anim.GetBoneTransform(HumanBodyBones.LeftFoot).position, isRunning);
+            bool isRunning = _anim.GetFloat("velocity") > .6f * _movementSpeed ? true : false;
+            Transform footTransform = Random.Range(0, 24) % 2 == 0 ? _anim.GetBoneTransform(HumanBodyBones.LeftFoot) : _anim.GetBoneTransform(HumanBodyBones.RightFoot);
+            HitManager.Instance.PlayFootstepSound(footTransform.position, isRunning);
         }
         
 
@@ -98,8 +107,15 @@ public class Controller : MonoBehaviour
 
     private IEnumerator ResetStun()
     {
-        yield return new WaitForSecondsRealtime(stunDuration);
+        yield return new WaitForSecondsRealtime(_stunDuration);
 
-        isStunned = false;
+        IsStunned = false;
     }
+
+    #endregion
+    #region Tasks
+
+    [Task]
+    protected bool IsStunned;
+    #endregion 
 }

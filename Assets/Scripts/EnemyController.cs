@@ -6,18 +6,24 @@ using Panda;
 
 public class EnemyController : Controller
 {
-    [SerializeField]
-    private float distanceToPlayer = 2f;
-    private NavMeshAgent agent;
-    [SerializeField]
-    private Transform[] waypoints;
-    private int waypointIdx;
-    private bool DestinationSet;
-    private EnemyPerception perception;
+    #region Variables
 
-    [Task]
-    private bool playerWasSeen;
-  
+    [SerializeField]
+    private float _distanceToPlayer = 2f;
+    private NavMeshAgent _agent;
+    [SerializeField]
+    private Transform[] _waypoints;
+    private int _waypointIdx;
+    private bool _destinationSet;
+    private EnemyPerception _perception;
+    private bool _seeking;
+
+
+
+
+    #endregion
+
+    #region Methods
 
     private void Awake()
     {
@@ -28,23 +34,47 @@ public class EnemyController : Controller
     protected override void OnAwake()
     {
         base.OnAwake();
-        agent = GetComponent<NavMeshAgent>();
-        agent.speed = movementSpeed;
-        agent.destination = waypoints[waypointIdx].position;
-        perception = GetComponentInChildren<EnemyPerception>();
+        _agent = GetComponent<NavMeshAgent>();
+        _agent.speed = _movementSpeed;
+        _agent.destination = _waypoints[_waypointIdx].position;
+        _perception = GetComponentInChildren<EnemyPerception>();
     }
 
 
     private void Update()
     {
-        anim.SetFloat("velocity", agent.velocity.magnitude);
+        _anim.SetFloat("velocity", _agent.velocity.magnitude);
     }
+
+    private void OnDrawGizmos()
+    {
+        if (_seeking)
+            Gizmos.DrawSphere(_perception.DetectedPosition, 2f);
+    }
+
+    private void ResumeMovement()
+    {
+        _anim.Play(_animToId["Base Layer.Idle_Walk_Run"]);
+        _agent.isStopped = false;
+    }
+
+    protected override void Stun()
+    {
+        base.Stun();
+        _agent.isStopped = true;
+    }
+    #endregion
+
+    #region Tasks
+
+    [Task]
+    private bool PlayerWasSeen;
 
 
     [Task]
     private void FindWaypoint()
     {
-        waypointIdx = (waypointIdx + 1) % waypoints.Length;
+        _waypointIdx = (_waypointIdx + 1) % _waypoints.Length;
 
         ThisTask.Succeed();
 
@@ -53,16 +83,16 @@ public class EnemyController : Controller
     [Task]
     private bool IsDestinationSet()
     {
-        return DestinationSet;
+        return _destinationSet;
     }
 
     [Task]
     private void SetDestination()
     {
         
-        agent.SetDestination(waypoints[waypointIdx].position);
+        _agent.SetDestination(_waypoints[_waypointIdx].position);
         
-        DestinationSet = true;
+        _destinationSet = true;
         ThisTask.Succeed();
         
     }
@@ -70,7 +100,7 @@ public class EnemyController : Controller
     [Task]
     private void ResetDestination()
     {
-        DestinationSet = false;
+        _destinationSet = false;
         ThisTask.Succeed();
     }
 
@@ -78,7 +108,7 @@ public class EnemyController : Controller
     private bool HasArrivedAtDestination()
     {
         
-        if(Vector3.Distance(agent.transform.position, waypoints[waypointIdx].position) < .2f)
+        if(Vector3.Distance(_agent.transform.position, _waypoints[_waypointIdx].position) < .2f)
             return true;
 
         ThisTask.debugInfo = "Is going to place?";
@@ -87,36 +117,30 @@ public class EnemyController : Controller
 
     }
 
-    protected override void Stun()
-    {
-        base.Stun();
-        agent.isStopped = true;
-    }
-
 
     [Task]
     private void ChasePlayer()
     {
         
-        if(perception.HasLineOfSight())
+        if(_perception.HasLineOfSight())
         {
-            agent.SetDestination(perception.DetectedPosition);
-            agent.speed = 6f;
-            DestinationSet = false;
-            perception.chasingPlayer = true;
+            _agent.SetDestination(_perception.DetectedPosition);
+            _agent.speed = 6f;
+            _destinationSet = false;
+            _perception.ChasingPlayer = true;
             ThisTask.debugInfo = "Seeking player in sight";
 
-            if (Vector3.Distance(agent.transform.position, agent.destination) < distanceToPlayer)
+            if (Vector3.Distance(_agent.transform.position, _agent.destination) < _distanceToPlayer)
             {
                 Debug.Log("at the place");
-                perception.chasingPlayer = false;
+                _perception.ChasingPlayer = false;
                 ThisTask.Succeed();
             }
 
         }
         else
         {
-            perception.chasingPlayer = false;
+            _perception.ChasingPlayer = false;
             ThisTask.Fail();
         }
 
@@ -127,14 +151,14 @@ public class EnemyController : Controller
     [Task]
     private bool WasPlayerSeenLastFrame()
     {
-        ThisTask.debugInfo = "" + perception.GetPlayerWasSeenLastFrame();
-        return perception.GetPlayerWasSeenLastFrame();
+        ThisTask.debugInfo = "" + _perception.GetPlayerWasSeenLastFrame();
+        return _perception.GetPlayerWasSeenLastFrame();
     }
 
     [Task]
     private bool WasPlayerHeard()
     {
-        return perception.PlayerWasHeard;
+        return _perception.PlayerWasHeard;
     }
 
     [Task]
@@ -142,75 +166,60 @@ public class EnemyController : Controller
     {
         if(ThisTask.isStarting)
         {
-            seeking = true;
-            agent.SetDestination(perception.DetectedPosition);
+            _seeking = true;
+            _agent.SetDestination(_perception.DetectedPosition);
         } 
-        else if( (Vector3.Distance(transform.position, agent.destination) < distanceToPlayer) || perception.PlayerIsInSight || perception.PlayerWasHeard)
+        else if( (Vector3.Distance(transform.position, _agent.destination) < _distanceToPlayer) || _perception.PlayerIsInSight || _perception.PlayerWasHeard)
         {
-            seeking = false;
+            _seeking = false;
             ThisTask.Succeed();
         }
     }
 
-    bool seeking;
-    private void OnDrawGizmos()
-    {
-        if (seeking)
-            Gizmos.DrawSphere(perception.DetectedPosition, 2f);
-    }
-
-
     [Task]
     private bool HasLineOfSight()
     {
-        bool seen = perception.HasLineOfSight();
-        playerWasSeen = seen;
-        return seen;
+        PlayerWasSeen = _perception.HasLineOfSight();
+        return PlayerWasSeen;
     }
 
     [Task]
     private bool IsChasingPlayer()
     {
-        return perception.IsChasingPlayer();
+        return _perception.ChasingPlayer;
     }
 
     [Task]
     private void WindupAttack()
     {
-        anim.CrossFade(animNameToId["Base Layer.Windup"],.2f);
+        _anim.CrossFade(_animToId["Base Layer.Windup"],.2f);
         ThisTask.Succeed();
     }
 
     [Task]
     private void Attack()
     {
-        anim.CrossFade(animNameToId["Base Layer.Slash"], .2f);
+        _anim.CrossFade(_animToId["Base Layer.Slash"], .2f);
         ThisTask.Succeed();
     }
 
     [Task]
     private bool IsNearPlayer()
     {
-        ThisTask.debugInfo = perception.PlayerIsInSight != false ? "Distance to player" + Vector3.Distance(transform.position, perception.DetectedPosition) : "Player not set";
-        if (perception.PlayerIsInSight && Vector3.Distance(perception.DetectedPosition, transform.position) < distanceToPlayer)
+        ThisTask.debugInfo = _perception.PlayerIsInSight != false ? "Distance to player" + Vector3.Distance(transform.position, _perception.DetectedPosition) : "Player not set";
+        if (_perception.PlayerIsInSight && Vector3.Distance(_perception.DetectedPosition, transform.position) < _distanceToPlayer)
         {
-            agent.isStopped = true;
-            agent.velocity = Vector3.zero;
+            _agent.isStopped = true;
+            _agent.velocity = Vector3.zero;
             return true;
         }
-        else if(agent.isStopped)
+        else if(_agent.isStopped)
         {        
             ResumeMovement();
         }
             
 
         return false;
-    }
-
-    private void ResumeMovement()
-    {
-        anim.Play(animNameToId["Base Layer.Idle_Walk_Run"]);
-        agent.isStopped = false;
     }
 
     [Task]
@@ -228,9 +237,9 @@ public class EnemyController : Controller
             ThisTask.Succeed();
 
 
-        if(perception.HasLineOfSight())
+        if(_perception.HasLineOfSight())
         {
-            transform.LookAt(perception.DetectedPosition, Vector3.up);
+            transform.LookAt(_perception.DetectedPosition, Vector3.up);
         }
     }
 
@@ -247,7 +256,7 @@ public class EnemyController : Controller
         PTaskTimer pT = ThisTask.GetData<PTaskTimer>();
 
         float elapsedTime = pT.GetElapsedTime();
-        if(perception.HasLineOfSight() || perception.PlayerWasHeard)
+        if(_perception.HasLineOfSight() || _perception.PlayerWasHeard)
         {
             ThisTask.Succeed();
         }
@@ -275,4 +284,5 @@ public class EnemyController : Controller
         private float startTime;
         private float duration;
     }
+    #endregion
 }

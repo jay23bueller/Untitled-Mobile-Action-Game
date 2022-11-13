@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
+    #region Variables
     [SerializeField]
     private float damageAmount;
     [SerializeField]
@@ -13,6 +14,10 @@ public class Weapon : MonoBehaviour
 
     [SerializeField]
     private GameObject trailManager;
+
+    #endregion
+
+    #region Methods
 
     private void Awake()
     {
@@ -56,4 +61,6 @@ public class Weapon : MonoBehaviour
         }
 
     }
+
+    #endregion
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Health : MonoBehaviour, IDamageable
 {
+    #region Variables
     // Start is called before the first frame update
     [SerializeField]
     private float maxHealth = 100f;
@@ -13,13 +14,14 @@ public class Health : MonoBehaviour, IDamageable
     [SerializeField]
     private float invulernabilityDuration = .5f;
 
+    #endregion
 
+    #region Methods
     void Awake()
     {
         currentHealth = maxHealth;
     }
 
-    
 
     public void ApplyDamage(float damageAmount, GameObject other)
     {
@@ -57,4 +59,5 @@ public class Health : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(invulernabilityDuration);
         isInvulernable = false;
     }
+    #endregion
 }

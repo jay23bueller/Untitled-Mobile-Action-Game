@@ -8,18 +8,17 @@ using UnityEngine;
 public class EnemyPerception : MonoBehaviour
 {
 
+    #region Variables
 
     [SerializeField]
-    private float maxDistance;
+    private float _maxViewingDistance;
+
 
     [SerializeField]
-    private float minHeight;
+    private float _initialViewingAngle;
 
     [SerializeField]
-    private float initialViewingAngle;
-
-    [SerializeField]
-    private float inSightViewingAngle;
+    private float _inSightViewingAngle;
 
     private bool _playerIsInSight;
 
@@ -28,11 +27,22 @@ public class EnemyPerception : MonoBehaviour
         get { return _playerIsInSight; }
     }
 
-    public bool chasingPlayer;
+    public bool PlayerWasHeard
+    {
+        get => _playerWasHeard;
+    }
 
-    private bool hasLineOfSight;
+    private bool _chasingPlayer;
 
-    private bool playerWasSeenLastFrame;
+    public bool ChasingPlayer
+    {
+        get => _chasingPlayer;
+        set => _chasingPlayer = value;
+    }
+
+    private bool _hasLineOfSight;
+
+    private bool _playerWasSeenLastFrame;
 
     private bool _playerWasHeard;
 
@@ -46,64 +56,57 @@ public class EnemyPerception : MonoBehaviour
         get => _detectedPosition;
     }
 
+    #endregion
 
-    // Start is called before the first frame update
+    #region Methods
 
     public bool GetPlayerWasSeenLastFrame()
     {
-        return playerWasSeenLastFrame;
+        return _playerWasSeenLastFrame;
     }
 
 
+    // If player is within the viewing angle of the enemy,
+    // check if there are any obstacles in the way.
     public bool HasLineOfSight()
     {
 
-    if (AIManager.Instance.PlayerTransform != null)
-    {
-
-        playerWasSeenLastFrame = hasLineOfSight;
-
-        hasLineOfSight = false;
-        float currentViewingAngle = _playerIsInSight ? inSightViewingAngle : initialViewingAngle;
-        _playerIsInSight = false;
-        Vector3 enemyToPlayerDirection = AIManager.Instance.PlayerTransform.position - transform.position;
-        enemyToPlayerDirection.y = 0f;
-        enemyToPlayerDirection.Normalize();
-        float dotProduct = Vector3.Dot(transform.forward, enemyToPlayerDirection);
-
-        if (dotProduct >= Mathf.Cos(currentViewingAngle / 2))
+        if (AIManager.Instance.PlayerTransform != null)
         {
-            RaycastHit hit;
-            Physics.Raycast(transform.position + GetComponent<CapsuleCollider>().center, enemyToPlayerDirection, out hit, maxDistance, ~LayerMask.GetMask("Ignore Vision"));
-            if (hit.collider != null && hit.collider.CompareTag("Player"))
-            {
-                
-                hasLineOfSight = true;
-                _detectedPosition = hit.collider.transform.position;
-                _playerIsInSight = true;
-            }
 
-                if (hit.collider != null)
-                    Debug.Log(hit.collider.name);
+            _playerWasSeenLastFrame = _hasLineOfSight;
+
+            _hasLineOfSight = false;
+            float currentViewingAngle = _playerIsInSight ? _inSightViewingAngle : _initialViewingAngle;
+            _playerIsInSight = false;
+            Vector3 enemyToPlayerDirection = AIManager.Instance.PlayerTransform.position - transform.position;
+            enemyToPlayerDirection.y = 0f;
+            enemyToPlayerDirection.Normalize();
+            float dotProduct = Vector3.Dot(transform.forward, enemyToPlayerDirection);
+
+            if (dotProduct >= Mathf.Cos(currentViewingAngle / 2))
+            {
+                RaycastHit hit;
+                Physics.Raycast(transform.position + GetComponent<CapsuleCollider>().center, enemyToPlayerDirection, out hit, _maxViewingDistance, ~LayerMask.GetMask("Ignore Vision"));
+                if (hit.collider != null && hit.collider.CompareTag("Player"))
+                {
+                
+                    _hasLineOfSight = true;
+                    _detectedPosition = hit.collider.transform.position;
+                    _playerIsInSight = true;
+                }
+
+                    if (hit.collider != null)
+                        Debug.Log(hit.collider.name);
+
+            }
 
         }
 
-    }
-
-        return hasLineOfSight;
-    }
-
-    public bool PlayerWasHeard
-    {
-        get => _playerWasHeard;
+        return _hasLineOfSight;
     }
 
 
-
-    public bool IsChasingPlayer()
-    {
-        return chasingPlayer;
-    }
 
     public void HeardSomething(Vector3 position)
     {
@@ -122,4 +125,6 @@ public class EnemyPerception : MonoBehaviour
         yield return new WaitForSecondsRealtime(_hearingCooldownTimer);
         _playerWasHeard = false;
     }
+
+    #endregion
 }

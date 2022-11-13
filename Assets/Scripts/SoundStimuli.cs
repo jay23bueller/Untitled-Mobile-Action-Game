@@ -4,30 +4,33 @@ using UnityEngine;
 
 public class SoundStimuli : MonoBehaviour
 {
+    #region Variables
     [SerializeField]
-    private float maxRadius;
+    private float _maxRadius;
 
     [SerializeField]
-    private float minRadius;
+    private float _minRadius;
 
-    private float currentRadius;
+    private float _currentRadius;
 
+    //Used to enable OnDrawGizmos intermittently
+    private bool _drawCooldown;
 
-    bool drawCooldown;
+    #endregion
 
-    // Update is called once per frame
+    #region Methods
     public void MakeNoise(float normalizedVelocity)
     {
-        if(!drawCooldown)
+        if(!_drawCooldown)
         {
-            drawCooldown = true;
+            _drawCooldown = true;
             StartCoroutine(DrawCooldown());
         }
 
-        currentRadius = normalizedVelocity * maxRadius;
+        _currentRadius = normalizedVelocity * _maxRadius;
         RaycastHit[] hits = Physics.SphereCastAll(
             transform.position,
-            currentRadius,
+            _currentRadius,
             transform.forward,
             0f
             );
@@ -48,17 +51,19 @@ public class SoundStimuli : MonoBehaviour
     private IEnumerator DrawCooldown()
     {
         yield return new WaitForSecondsRealtime(1.0f);
-        drawCooldown = false;
+        _drawCooldown = false;
     }
 
 
     private void OnDrawGizmosSelected()
     {
-        if(drawCooldown)
+        if(_drawCooldown)
         {
-            Gizmos.DrawWireSphere(transform.position, currentRadius);
+            Gizmos.DrawWireSphere(transform.position, _currentRadius);
         }
     }
+
+    #endregion
 
 
 }
