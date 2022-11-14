@@ -3,9 +3,11 @@ tree("Root")
 		not IsStunned
 		fallback
 			tree("Attack")
-			tree("Chase")
-			tree("Find")
-			tree("Patrol")
+			while not AboutToGetHit
+				fallback
+					tree("Chase")
+					tree("Find")
+					tree("Patrol")
 		
 tree("Find")
 	sequence

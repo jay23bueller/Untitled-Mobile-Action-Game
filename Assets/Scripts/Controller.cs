@@ -119,5 +119,6 @@ public class Controller : MonoBehaviour
 
     [Task]
     protected bool IsStunned;
+
     #endregion 
 }

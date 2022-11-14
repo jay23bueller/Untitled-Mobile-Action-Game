@@ -87,12 +87,22 @@ public class EnemyController : Controller
     protected override void Stun()
     {
         base.Stun();
+        AboutToGetHit = false;
         _anim.SetBool("hit", true);
+        _agent.isStopped = true;
+    }
+
+    public void ReadyForPlayerAttack()
+    {
+        AboutToGetHit = true;
         _agent.isStopped = true;
     }
     #endregion
 
     #region Tasks
+
+    [Task]
+    protected bool AboutToGetHit;
 
     [Task]
     private bool PlayerWasSeen;

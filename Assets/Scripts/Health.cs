@@ -23,17 +23,17 @@ public class Health : MonoBehaviour, IDamageable
     }
 
 
-    public void ApplyDamage(float damageAmount, GameObject other)
+    public void ApplyDamage(float damageAmount, GameObject attacker)
     {
         Debug.Log("Attack?");
-        if(!other.gameObject.CompareTag(gameObject.tag))
+        if(!attacker.gameObject.CompareTag(gameObject.tag))
         {
             if (!isInvulernable)
             {
                 Debug.Log("Applied " + damageAmount + "!");
-                if (other.GetComponent<PlayerController>() != null)
+                if (attacker.GetComponent<PlayerController>() != null)
                 {
-                    StartCoroutine(other.GetComponent<PlayerController>().ShakeCameraAndSlowDownTime());
+                    StartCoroutine(attacker.GetComponent<PlayerController>().ShakeCameraAndSlowDownTime());
                     GetComponent<Controller>().GetStunned();
                 }
 

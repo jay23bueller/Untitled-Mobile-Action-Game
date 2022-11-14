@@ -2,6 +2,7 @@ using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,43 +10,45 @@ using UnityEngine.InputSystem;
 public class PlayerController : Controller
 {
     #region Variables
-    private PlayerInputActions inputActions;
-    private CharacterController controller;
+    private PlayerInputActions _inputActions;
+    private CharacterController _controller;
 
-    //Attack Related Parameters
+    //Attack Parameters
     [SerializeField]
-    private float castRadius;
-    private RaycastHit hit;
+    private float _castRadius;
     [SerializeField]
-    private float attackRange;
+    private float _attackRange;
     private bool _acquiredTarget;
-    private Vector3 attackVelocity;
-    private Vector3 playerToEnemyDirection;
-    private Vector3 lastKnownEnemyPosition;
-    private bool nextAttack = false;
+    private Vector3 _attackVelocity;
+    private Vector3 _playerToEnemyDirection;
+    private Vector3 _lastKnownEnemyPosition;
+    private bool _nextAttack = false;
+    private int _enemyIdx = -1;
     [SerializeField]
-    private float minDistanceFromEnemy;
+    private float _minDistanceFromEnemy;
 
 
     // Camera Related Parameters
     [SerializeField]
-    private CinemachineFreeLook freeLookCam;
+    private CinemachineFreeLook _freeLookCam;
     [SerializeField]
-    private float cameraMaxAmp;
+    private float _cameraMaxAmp;
     [SerializeField]
-    private float cameraMaxFreq;
+    private float _cameraMaxFreq;
 
     [SerializeField]
-    private float minTimeScale;
+    private float _minTimeScale;
 
+    //Dodge Parameters
+    [SerializeField]
+    private float _standingHeight = 1.72f;
 
     [SerializeField]
-    private float standingHeight = 1.72f;
+    private float _rollingHeight;
 
-    [SerializeField]
-    private float rollingHeight;
+    private SoundStimuli _soundStimuli;
 
-    private SoundStimuli soundStimuli;
+    private bool _drawAttackSphereCast;
 
     #endregion
 
@@ -67,43 +70,65 @@ public class PlayerController : Controller
     {
         if (_anim.GetBool("attack"))
         {
-
+            RaycastHit[] hits = null;
+            
+            
             if (!_acquiredTarget)
             {
                 Vector3 attackDirection = new Vector3();
                 CalculateMovementInputRelativeToCamera(ref attackDirection);
-                transform.forward = attackDirection.magnitude == 0 ? transform.forward : attackDirection;
 
+               
+                
+                hits = Physics.SphereCastAll(transform.position + _controller.center, _castRadius, transform.forward, _attackRange);
+                if (attackDirection.magnitude > 0)
+                    hits.OrderByDescending(hit => Vector3.Dot(attackDirection, (hit.collider.transform.position - transform.position).normalized));
 
-                Physics.SphereCast(transform.position + controller.center, castRadius, transform.forward, out hit, attackRange);
-
-
-                if (hit.collider != null && hit.collider.CompareTag("Enemy"))
+                for(int i = 0; i < hits.Length; i++)
                 {
-                    playerToEnemyDirection = (hit.collider.transform.position - transform.position);
-                    lastKnownEnemyPosition = hit.collider.transform.position;
+                    if (hits[i].collider != null && hits[i].collider.CompareTag("Enemy"))
+                    {
+                        hits[i].collider.GetComponent<EnemyController>().ReadyForPlayerAttack();
+                        
+                        _playerToEnemyDirection = (hits[i].collider.transform.position - transform.position);
+                        _lastKnownEnemyPosition = hits[i].collider.transform.position;
 
-                    Debug.DrawLine(transform.position + controller.center, hit.collider.transform.position + controller.center, Color.red, 4f);
-                    attackVelocity = playerToEnemyDirection / (_anim.GetCurrentAnimatorStateInfo(0).length - (_anim.GetCurrentAnimatorStateInfo(0).length * .5f));
+                        Debug.DrawLine(transform.position + _controller.center, hits[i].collider.transform.position + _controller.center, Color.red, 4f);
+                        _attackVelocity = _playerToEnemyDirection / (_anim.GetCurrentAnimatorStateInfo(0).length - (_anim.GetCurrentAnimatorStateInfo(0).length * .5f));
+                        _enemyIdx = i;
+                        _acquiredTarget = true;
+                        break;
 
+
+                    }
 
                 }
-                _acquiredTarget = true;
+
+
 
             }
 
-            if (_acquiredTarget && hit.collider != null)
+            if (_acquiredTarget && _enemyIdx != -1)
             {
-                playerToEnemyDirection.y = 0f;
-                transform.forward = playerToEnemyDirection.normalized;
-                if (Vector3.Dot(transform.forward, lastKnownEnemyPosition - transform.position) > .92 && (Vector3.Distance(transform.position, lastKnownEnemyPosition) > minDistanceFromEnemy))
+                _playerToEnemyDirection.y = 0f;
+                transform.forward = _playerToEnemyDirection.normalized;
+                if (Vector3.Dot(transform.forward, (_lastKnownEnemyPosition - transform.position).normalized) > .92 && (Vector3.Distance(transform.position, _lastKnownEnemyPosition) > _minDistanceFromEnemy))
                 {
-
-                    controller.Move(attackVelocity * Time.deltaTime);
+                    Debug.Log($"Current attack velocity : {_attackVelocity}");
+                    _drawAttackSphereCast = true;
+                    _controller.Move(_attackVelocity * Time.deltaTime);
                 }
 
             }
 
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if(_drawAttackSphereCast)
+        {
+            Gizmos.DrawWireSphere(_lastKnownEnemyPosition + _controller.center, _castRadius);
         }
     }
 
@@ -128,7 +153,7 @@ public class PlayerController : Controller
                 AnimatorStateInfo currentStateInfo = _anim.GetCurrentAnimatorStateInfo(0);
                 if (currentStateInfo.IsTag("Attack") && currentStateInfo.normalizedTime > .3f && currentStateInfo.normalizedTime < 1f && _anim.GetInteger("attackNum") < 2)
                 {
-                    nextAttack = true;
+                    _nextAttack = true;
                 }
             }
         }
@@ -139,11 +164,11 @@ public class PlayerController : Controller
     private void CheckForNextAttack()
     {
         _acquiredTarget = false;
-
-        if (nextAttack)
+        _drawAttackSphereCast = false;
+        if (_nextAttack)
         {
             _anim.SetInteger("attackNum", _anim.GetInteger("attackNum") + 1);
-            nextAttack = false;
+            _nextAttack = false;
         }
         else
         {
@@ -173,7 +198,7 @@ public class PlayerController : Controller
             Vector3 movementInput = new Vector3(); 
             CalculateMovementInputRelativeToCamera(ref movementInput);
             transform.forward = movementInput.magnitude > 0f ? movementInput : transform.forward;
-            controller.height = rollingHeight;
+            _controller.height = _rollingHeight;
             _anim.Play(_animToId["Base Layer.Dodge"]);
             _anim.SetBool("dodging", true);
             ResetAttack();
@@ -195,14 +220,14 @@ public class PlayerController : Controller
     private void ResetDodge()
     {
         _anim.SetBool("dodging", false);
-        controller.height = standingHeight;
+        _controller.height = _standingHeight;
     }
 
     //Currently used to modify the character controller's height using a smooth curve tied
     //to the dodging animation.
     private void ModifyCharacterControllerHeight()
     {
-        controller.height = _anim.GetFloat("height") * standingHeight;
+        _controller.height = _anim.GetFloat("height") * _standingHeight;
     }
 
 
@@ -212,7 +237,7 @@ public class PlayerController : Controller
     #region Unity
     private void OnEnable()
     {
-        inputActions.Enable();
+        _inputActions.Enable();
     }
 
     void Update()
@@ -221,8 +246,8 @@ public class PlayerController : Controller
         MovePlayer(ref movementInput);
         ApplyGravity(ref movementInput);
 
-        controller.Move(movementInput * Time.deltaTime);
-        _anim.SetFloat("velocity", controller.velocity.magnitude);
+        _controller.Move(movementInput * Time.deltaTime);
+        _anim.SetFloat("velocity", _controller.velocity.magnitude);
 
     }
 
@@ -235,11 +260,11 @@ public class PlayerController : Controller
     protected override void OnAwake()
     {
         base.OnAwake();
-        inputActions = new PlayerInputActions();
-        inputActions.Player.Attack.performed += _ => { Attack(); };
-        inputActions.Player.Dodge.performed += _ => { Dodge(); };
-        controller = GetComponent<CharacterController>();
-        soundStimuli = GetComponentInChildren<SoundStimuli>();
+        _inputActions = new PlayerInputActions();
+        _inputActions.Player.Attack.performed += _ => { Attack(); };
+        _inputActions.Player.Dodge.performed += _ => { Dodge(); };
+        _controller = GetComponent<CharacterController>();
+        _soundStimuli = GetComponentInChildren<SoundStimuli>();
     }
 
     private void OnAnimatorMove()
@@ -253,7 +278,7 @@ public class PlayerController : Controller
 
     private void CalculateMovementInputRelativeToCamera(ref Vector3 movementInput)
     {
-       Vector2 input = inputActions.Player.Walk.ReadValue<Vector2>();
+       Vector2 input = _inputActions.Player.Walk.ReadValue<Vector2>();
         movementInput.x = input.x;
         movementInput.z = input.y;
         movementInput = Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * movementInput;
@@ -278,7 +303,7 @@ public class PlayerController : Controller
 
     private void ApplyGravity(ref Vector3 movementInput)
     {
-        if (!controller.isGrounded)
+        if (!_controller.isGrounded)
             movementInput.y = -9.8f;
     }
 
@@ -289,18 +314,18 @@ public class PlayerController : Controller
     {
         for(int i = 0; i < 3; i++)
         {
-            freeLookCam.GetRig(i).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = cameraMaxAmp;
-            freeLookCam.GetRig(i).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_FrequencyGain = cameraMaxFreq;
+            _freeLookCam.GetRig(i).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = _cameraMaxAmp;
+            _freeLookCam.GetRig(i).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_FrequencyGain = _cameraMaxFreq;
         }
 
-        Time.timeScale = minTimeScale;
+        Time.timeScale = _minTimeScale;
 
         yield return new WaitForSecondsRealtime(.2f);
 
         for (int i = 0; i < 3; i++)
         {
-            freeLookCam.GetRig(i).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = 0f;
-            freeLookCam.GetRig(i).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_FrequencyGain = 0f;
+            _freeLookCam.GetRig(i).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = 0f;
+            _freeLookCam.GetRig(i).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_FrequencyGain = 0f;
         }
 
         Time.timeScale = 1f;
@@ -313,7 +338,7 @@ public class PlayerController : Controller
         float currentVelocity = _anim.GetFloat("velocity");
 
         if (currentVelocity > 0f)
-            soundStimuli.MakeNoise(currentVelocity / _movementSpeed);   
+            _soundStimuli.MakeNoise(currentVelocity / _movementSpeed);   
     }
 
     #endregion
