@@ -17,6 +17,12 @@ public sealed class HitManager : MonoBehaviour
     private AudioSource hitManagerAudioSource;
 
     [SerializeField]
+    private float _hitVolume;
+
+    [SerializeField]
+    private float _weaponVolume;
+
+    [SerializeField]
     private AudioClip[] walkingFootstepAudioClips;
 
     [SerializeField]
@@ -34,12 +40,12 @@ public sealed class HitManager : MonoBehaviour
 
     public void PlayHitSound()
     {
-        hitManagerAudioSource.PlayOneShot(hitAudioClip);
+        hitManagerAudioSource.PlayOneShot(hitAudioClip, _hitVolume);
     }
 
     public void PlayWeaponSound(AudioClip weaponSound)
     {
-        hitManagerAudioSource.PlayOneShot(weaponSound);
+        hitManagerAudioSource.PlayOneShot(weaponSound, _weaponVolume);
     }
 
     public void PlaySwordHitEffect(Vector3 hitLocation)

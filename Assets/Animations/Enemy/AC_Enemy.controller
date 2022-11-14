@@ -69,7 +69,7 @@ AnimatorStateMachine:
     m_Position: {x: 140, y: 390, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 4141006928121012294}
-    m_Position: {x: 893.19257, y: 244.54834, z: 0}
+    m_Position: {x: 890, y: 240, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 56504864465321250}
     m_Position: {x: 562.67316, y: 347.3268, z: 0}
@@ -153,13 +153,13 @@ AnimatorController:
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
-  - m_Name: Distance
-    m_Type: 1
+    m_Controller: {fileID: 0}
+  - m_Name: hit
+    m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer

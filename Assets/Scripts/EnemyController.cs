@@ -17,6 +17,8 @@ public class EnemyController : Controller
     private bool _destinationSet;
     private EnemyPerception _perception;
     private bool _seeking;
+    [SerializeField]
+    private float _knockbackSpeed;
 
 
 
@@ -25,11 +27,46 @@ public class EnemyController : Controller
 
     #region Methods
 
+    #region Unity
     private void Awake()
     {
         OnAwake();
 
     }
+
+    private void OnAnimatorMove()
+    {
+        if (_anim.GetBool("hit"))
+        {
+            transform.position += (-transform.forward * _knockbackSpeed * Time.deltaTime);
+        }
+    }
+
+    private void Update()
+    {
+        _anim.SetFloat("velocity", _agent.velocity.magnitude);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (_seeking)
+            Gizmos.DrawSphere(_perception.DetectedPosition, 2f);
+
+        if (_waypoints.Length >= 1)
+        {
+            if (_waypoints.Length > 1)
+            {
+                for (int i = 0; i < _waypoints.Length; i++)
+                {
+                    Gizmos.DrawWireSphere(_waypoints[i].transform.position + (Vector3.up * .2f), .2f);
+                    Gizmos.DrawLine(_waypoints[i].transform.position + (Vector3.up * .2f), _waypoints[(i + 1) % _waypoints.Length].transform.position + (Vector3.up * .2f));
+
+                }
+            }
+
+        }
+    }
+
 
     protected override void OnAwake()
     {
@@ -40,18 +77,7 @@ public class EnemyController : Controller
         _perception = GetComponentInChildren<EnemyPerception>();
     }
 
-
-    private void Update()
-    {
-        _anim.SetFloat("velocity", _agent.velocity.magnitude);
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (_seeking)
-            Gizmos.DrawSphere(_perception.DetectedPosition, 2f);
-    }
-
+    #endregion
     private void ResumeMovement()
     {
         _anim.Play(_animToId["Base Layer.Idle_Walk_Run"]);
@@ -61,6 +87,7 @@ public class EnemyController : Controller
     protected override void Stun()
     {
         base.Stun();
+        _anim.SetBool("hit", true);
         _agent.isStopped = true;
     }
     #endregion

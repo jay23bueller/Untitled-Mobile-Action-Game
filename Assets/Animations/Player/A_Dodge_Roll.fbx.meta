@@ -97,7 +97,7 @@ ModelImporter:
           postInfinity: 3
           rotationOrder: 4
       events:
-      - time: 0.8511993
+      - time: 0.81495553
         functionName: ResetDodge
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: beb0e218cd33c1e428fcb83e03857699, type: 3}

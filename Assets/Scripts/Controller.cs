@@ -12,6 +12,8 @@ public class Controller : MonoBehaviour
     protected const int ANIM_TRUE = 1;
     protected const int ANIM_FALSE = 0;
 
+    protected const string BASE_LAYER = "Base Layer.";
+
     protected Weapon _weapon;
 
     [SerializeField]
@@ -40,7 +42,7 @@ public class Controller : MonoBehaviour
         {
             foreach(string animationName in _animationNames)
             {
-                _animToId.Add(animationName, Animator.StringToHash(animationName));
+                _animToId.Add(BASE_LAYER + animationName, Animator.StringToHash(animationName));
             }
         }
     }
@@ -108,7 +110,7 @@ public class Controller : MonoBehaviour
     private IEnumerator ResetStun()
     {
         yield return new WaitForSecondsRealtime(_stunDuration);
-
+        _anim.SetBool("hit", false);
         IsStunned = false;
     }
 

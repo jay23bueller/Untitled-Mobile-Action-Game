@@ -3560,17 +3560,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72c6e51ae9e2614469158c87714efb88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stunDuration: 1.5
-  movementSpeed: 3.5
-  animationNames:
-  - Base Layer.Idle_Walk_Run
-  - Base Layer.Hit
-  - Base Layer.Windup
-  - Base Layer.Slash
-  distanceToPlayer: 1.5
-  waypoints:
+  _stunDuration: 0.2
+  _movementSpeed: 3.5
+  _animationNames:
+  - Windup
+  - Hit
+  - Slash
+  - Idle_Walk_Run
+  _distanceToPlayer: 2
+  _waypoints:
   - {fileID: 0}
   - {fileID: 0}
+  _knockbackSpeed: 22
 --- !u!114 &355041260859040031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3583,12 +3584,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3adb0bcf6ec680b45ae78552272e41df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxDistance: 15
-  minHeight: 0
-  initialViewingAngle: 90
-  inSightViewingAngle: 120
-  chasingPlayer: 0
-  _hearingCooldownTimer: 1
+  _maxViewingDistance: 15
+  _initialViewingAngle: 90
+  _inSightViewingAngle: 120
+  _hearingCooldownTimer: 0.2
 --- !u!114 &1386760004
 MonoBehaviour:
   m_ObjectHideFlags: 0

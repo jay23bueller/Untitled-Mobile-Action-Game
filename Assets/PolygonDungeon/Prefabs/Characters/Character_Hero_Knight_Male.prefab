@@ -2889,17 +2889,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: beb0e218cd33c1e428fcb83e03857699, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stunDuration: 0
-  movementSpeed: 6
-  animationNames:
-  - Base Layer.Idle_Walk_Run
-  - Base Layer.Dodge
-  - Base Layer.Hit
-  - Base Layer.Axe_Combo_1
-  - Base Layer.Axe_Combo_2
-  - Base Layer.Axe_Combo_3
-  castRadius: 1
-  attackRange: 3
+  _stunDuration: 0
+  _movementSpeed: 6
+  _animationNames:
+  - Axe_Combo_1
+  - Axe_Combo_2
+  - Axe_Combo_3
+  - Hit
+  - Dodge
+  - Idle_Walk_Run
+  castRadius: 1.5
+  attackRange: 2.5
   minDistanceFromEnemy: 1.7
   freeLookCam: {fileID: 0}
   cameraMaxAmp: 3
@@ -5087,8 +5087,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ae4503aecd366341ac0f88c7a112600, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxRadius: 5
-  minRadius: 1
+  _maxRadius: 6
+  _minRadius: 0.5
 --- !u!1 &2469334462728255068
 GameObject:
   m_ObjectHideFlags: 0

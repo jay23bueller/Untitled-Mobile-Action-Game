@@ -70,9 +70,9 @@ public class PlayerController : Controller
 
             if (!_acquiredTarget)
             {
-                Vector3 attackDirection = new Vector3(inputActions.Player.Walk.ReadValue<Vector2>().x, 0f, inputActions.Player.Walk.ReadValue<Vector2>().y);
-
-                transform.forward = attackDirection.magnitude == 0 ? transform.forward : Quaternion.AngleAxis(Camera.main.transform.rotation.eulerAngles.y, Vector3.up) * attackDirection;
+                Vector3 attackDirection = new Vector3();
+                CalculateMovementInputRelativeToCamera(ref attackDirection);
+                transform.forward = attackDirection.magnitude == 0 ? transform.forward : attackDirection;
 
 
                 Physics.SphereCast(transform.position + controller.center, castRadius, transform.forward, out hit, attackRange);
@@ -83,7 +83,7 @@ public class PlayerController : Controller
                     playerToEnemyDirection = (hit.collider.transform.position - transform.position);
                     lastKnownEnemyPosition = hit.collider.transform.position;
 
-                    Debug.DrawLine(transform.position + controller.center, hit.collider.transform.position + controller.center, Color.red, 2f);
+                    Debug.DrawLine(transform.position + controller.center, hit.collider.transform.position + controller.center, Color.red, 4f);
                     attackVelocity = playerToEnemyDirection / (_anim.GetCurrentAnimatorStateInfo(0).length - (_anim.GetCurrentAnimatorStateInfo(0).length * .5f));
 
 
@@ -96,7 +96,7 @@ public class PlayerController : Controller
             {
                 playerToEnemyDirection.y = 0f;
                 transform.forward = playerToEnemyDirection.normalized;
-                if (Vector3.Distance(transform.position, lastKnownEnemyPosition) > minDistanceFromEnemy)
+                if (Vector3.Dot(transform.forward, lastKnownEnemyPosition - transform.position) > .92 && (Vector3.Distance(transform.position, lastKnownEnemyPosition) > minDistanceFromEnemy))
                 {
 
                     controller.Move(attackVelocity * Time.deltaTime);
@@ -138,8 +138,9 @@ public class PlayerController : Controller
     //An animation event set on certain attack animations in order to chain attacks together.
     private void CheckForNextAttack()
     {
+        _acquiredTarget = false;
 
-        if(nextAttack)
+        if (nextAttack)
         {
             _anim.SetInteger("attackNum", _anim.GetInteger("attackNum") + 1);
             nextAttack = false;
@@ -151,8 +152,6 @@ public class PlayerController : Controller
             _weapon.EnableDamage(false);
         }
 
-        _acquiredTarget = false;
-        
 
     }
 

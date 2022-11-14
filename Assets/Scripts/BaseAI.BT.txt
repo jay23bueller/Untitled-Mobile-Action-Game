@@ -1,6 +1,6 @@
 tree("Root")
 	sequence
-		not isStunned
+		not IsStunned
 		fallback
 			tree("Attack")
 			tree("Chase")
@@ -39,7 +39,7 @@ tree("Patrol")
 tree("Attack")
 	sequence
 		IsNearPlayer
-		while not isStunned
+		while not IsStunned
 			sequence
 				WindupAttack
 				LookAtPlayerWhileWindingUp(.7)
