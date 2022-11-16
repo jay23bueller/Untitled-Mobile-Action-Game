@@ -72,7 +72,7 @@ public class EnemyController : Controller
     {
         base.OnAwake();
         _agent = GetComponent<NavMeshAgent>();
-        _agent.speed = _movementSpeed;
+        _agent.speed = _currentMovmentSpeed;
         _agent.destination = _waypoints[_waypointIdx].position;
         _perception = GetComponentInChildren<EnemyPerception>();
     }

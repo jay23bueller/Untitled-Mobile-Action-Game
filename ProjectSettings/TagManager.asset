@@ -8,6 +8,7 @@ TagManager:
   - PlayerWeapon
   - Waypoint
   - EnemyWeapon
+  - CinemachineTarget
   layers:
   - Default
   - TransparentFX

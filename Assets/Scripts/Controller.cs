@@ -20,7 +20,9 @@ public class Controller : MonoBehaviour
     protected float _stunDuration;
 
     [SerializeField]
-    protected float _movementSpeed;
+    protected float _normalMovementSpeed;
+
+    protected float _currentMovmentSpeed;
 
     [SerializeField]
     protected string[] _animationNames;
@@ -38,6 +40,7 @@ public class Controller : MonoBehaviour
         _weapon = GetComponentInChildren<Weapon>();
         _anim = GetComponent<Animator>();
         _animToId = new Dictionary<string, int>();
+        _currentMovmentSpeed = _normalMovementSpeed;
         if(_animationNames.Length > 0)
         {
             foreach(string animationName in _animationNames)
@@ -97,7 +100,7 @@ public class Controller : MonoBehaviour
         
         if (evt.animatorClipInfo.weight > .5f)
         {
-            bool isRunning = _anim.GetFloat("velocity") > .6f * _movementSpeed ? true : false;
+            bool isRunning = _anim.GetFloat("velocity") > .6f * _currentMovmentSpeed ? true : false;
             Transform footTransform = Random.Range(0, 24) % 2 == 0 ? _anim.GetBoneTransform(HumanBodyBones.LeftFoot) : _anim.GetBoneTransform(HumanBodyBones.RightFoot);
             HitManager.Instance.PlayFootstepSound(footTransform.position, isRunning);
         }

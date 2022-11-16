@@ -3,12 +3,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEditor.Animations;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal.Internal;
 
 public class PlayerController : Controller
 {
+    private const float MOVEMENT_ROTATION_DELTA_ANGLE = 5f;
+    private const float AIM_ROTATION_PITCH_MAX_ANGLE = 89f;
+    private const float AIM_ROTATION_PITCH_MIN_ANGLE = -89f;
+    private const float AIM_ROTATION_YAW_SPEED = 60f;
     #region Variables
     private PlayerInputActions _inputActions;
     private CharacterController _controller;
@@ -18,6 +25,8 @@ public class PlayerController : Controller
     private float _castRadius;
     [SerializeField]
     private float _attackRange;
+    [SerializeField]
+    private float _strafeSpeed;
     private bool _acquiredTarget;
     private Vector3 _attackVelocity;
     private Vector3 _playerToEnemyDirection;
@@ -39,6 +48,9 @@ public class PlayerController : Controller
     [SerializeField]
     private float _minTimeScale;
 
+    [SerializeField]
+    private CinemachineVirtualCamera _cinemachineThirdPersonCamera;
+
     //Dodge Parameters
     [SerializeField]
     private float _standingHeight = 1.72f;
@@ -49,6 +61,9 @@ public class PlayerController : Controller
     private SoundStimuli _soundStimuli;
 
     private bool _drawAttackSphereCast;
+
+    private Transform _lookAtTransform;
+    private float _lookAtTransformPitchAngle = 0f;
 
     #endregion
 
@@ -230,8 +245,21 @@ public class PlayerController : Controller
         _controller.height = _anim.GetFloat("height") * _standingHeight;
     }
 
+    private void Aim()
+    {
+        _freeLookCam.Priority = 0;
+        _anim.SetBool("aiming", true);
+        _currentMovmentSpeed = _strafeSpeed;
+    }
 
-
+    private void ReleaseAim()
+    {
+        _anim.SetBool("aiming", false);
+        _freeLookCam.Priority = 10;
+        _lookAtTransform.localRotation = Quaternion.identity;
+        _lookAtTransformPitchAngle = 0f;
+        _currentMovmentSpeed = _normalMovementSpeed;
+    }
 
 
     #region Unity
@@ -245,9 +273,14 @@ public class PlayerController : Controller
         Vector3 movementInput = new Vector3();
         MovePlayer(ref movementInput);
         ApplyGravity(ref movementInput);
-
         _controller.Move(movementInput * Time.deltaTime);
+
+        RotatePlayer();
+        Debug.Log("Rotation Value: " + _lookAtTransform.localRotation.eulerAngles.x);
+
         _anim.SetFloat("velocity", _controller.velocity.magnitude);
+        _anim.SetFloat("velocityX", _controller.velocity.x);
+        _anim.SetFloat("velocityZ", _controller.velocity.z);
 
     }
 
@@ -263,6 +296,9 @@ public class PlayerController : Controller
         _inputActions = new PlayerInputActions();
         _inputActions.Player.Attack.performed += _ => { Attack(); };
         _inputActions.Player.Dodge.performed += _ => { Dodge(); };
+        _inputActions.Player.Aim.performed += _ => { Aim(); };
+        _inputActions.Player.Aim.canceled += _ => { ReleaseAim(); };
+        _lookAtTransform = GameObject.FindGameObjectWithTag("CinemachineTarget").transform;
         _controller = GetComponent<CharacterController>();
         _soundStimuli = GetComponentInChildren<SoundStimuli>();
     }
@@ -272,6 +308,11 @@ public class PlayerController : Controller
         AnimatorAttack();
 
         AnimatorDodge();
+
+    }
+
+    private void LateUpdate()
+    {
 
     }
     #endregion
@@ -286,6 +327,35 @@ public class PlayerController : Controller
 
     }
 
+    private void RotatePlayer()
+    {
+
+       
+        if(!_anim.GetBool("aiming"))
+        {
+            //The character is rotated based on the movement input
+            Vector2 input = _inputActions.Player.Walk.ReadValue<Vector2>();
+            
+            if(input.sqrMagnitude > 0f)
+            {
+                float yawAngle = Mathf.Atan2(input.x, input.y) * Mathf.Rad2Deg + Camera.main.transform.eulerAngles.y;
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(0f, yawAngle, 0f), MOVEMENT_ROTATION_DELTA_ANGLE);
+            }
+
+        }
+        else
+        {
+            //The 3rd-Person camera is looking at a gameobject that is a child of the player game object. The look input is used to
+            //rotate the child gameobject around it's local x-axis and rotates the player game game object around it's y-axis.
+            Vector2 input = _inputActions.Player.Look.ReadValue<Vector2>();
+            _lookAtTransformPitchAngle = Mathf.Clamp(_lookAtTransformPitchAngle + input.y * 60f * Time.deltaTime, -AIM_ROTATION_PITCH_MIN_ANGLE, AIM_ROTATION_PITCH_MAX_ANGLE);
+            _lookAtTransform.localRotation = Quaternion.Euler(_lookAtTransformPitchAngle, 0f, 0f);
+            
+            transform.Rotate(0f, input.x * AIM_ROTATION_YAW_SPEED * Time.deltaTime, 0f);
+        }
+        
+    }
+
     private void MovePlayer(ref Vector3 movementInput)
     {
         
@@ -293,9 +363,7 @@ public class PlayerController : Controller
         {
             CalculateMovementInputRelativeToCamera(ref movementInput);
 
-            transform.forward = Vector3.Slerp(transform.forward, movementInput, .1f);
-
-            movementInput = movementInput * _movementSpeed;
+            movementInput = movementInput * _currentMovmentSpeed;
 
         }
 
@@ -338,7 +406,7 @@ public class PlayerController : Controller
         float currentVelocity = _anim.GetFloat("velocity");
 
         if (currentVelocity > 0f)
-            _soundStimuli.MakeNoise(currentVelocity / _movementSpeed);   
+            _soundStimuli.MakeNoise(currentVelocity / _currentMovmentSpeed);   
     }
 
     #endregion
