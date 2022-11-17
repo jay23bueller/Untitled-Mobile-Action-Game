@@ -79,9 +79,6 @@ public class PlayerController : Controller
     [SerializeField]
     private Transform _arrowSpawnTransform;
 
-    private bool _storedInitialRotation;
-    private Vector3 _initialSpineAngles;
-    private Vector3 _currentSpineAngles;
 
     #endregion
 
@@ -280,7 +277,6 @@ public class PlayerController : Controller
     private void ReleaseAim()
     {
         _anim.SetBool("aiming", false);
-        _storedInitialRotation = false;
         _bow.SetActive(false);
         Destroy(_arrow);
         StartCoroutine(LowerBow());
@@ -358,15 +354,6 @@ public class PlayerController : Controller
     {
         if (_anim.GetBool("aiming") && _anim.GetLayerWeight(1) >= 1f)
         {
-
-            if (!_storedInitialRotation)
-            {
-                _initialSpineAngles = _anim.GetBoneTransform(HumanBodyBones.Spine).localRotation.eulerAngles;
-                Debug.Log("Initial Spine Angles: "+_initialSpineAngles);
-                _currentSpineAngles = _initialSpineAngles;
-                _storedInitialRotation = true;
-            }
-            Vector2 input = _inputActions.Player.Look.ReadValue<Vector2>();
 
             _anim.GetBoneTransform(HumanBodyBones.Spine).RotateAround(_anim.GetBoneTransform(HumanBodyBones.Spine).position,_anim.GetBoneTransform(HumanBodyBones.Spine).up, -_lookAtTransform.localRotation.eulerAngles.x);
 
