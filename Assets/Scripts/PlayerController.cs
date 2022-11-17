@@ -12,11 +12,15 @@ using UnityEngine.Rendering.Universal.Internal;
 
 public class PlayerController : Controller
 {
+
+    #region Variables
+
+    //Constants
     private const float MOVEMENT_ROTATION_DELTA_ANGLE = 5f;
     private const float AIM_ROTATION_PITCH_MAX_ANGLE = 89f;
     private const float AIM_ROTATION_PITCH_MIN_ANGLE = -89f;
     private const float AIM_ROTATION_YAW_SPEED = 60f;
-    #region Variables
+
     private PlayerInputActions _inputActions;
     private CharacterController _controller;
 
@@ -249,6 +253,8 @@ public class PlayerController : Controller
     {
         _freeLookCam.Priority = 0;
         _anim.SetBool("aiming", true);
+        //_anim.Play("Bow Layer.Draw");
+        //_anim.SetLayerWeight(1, 1.0f);
         _currentMovmentSpeed = _strafeSpeed;
     }
 
@@ -348,8 +354,11 @@ public class PlayerController : Controller
             //The 3rd-Person camera is looking at a gameobject that is a child of the player game object. The look input is used to
             //rotate the child gameobject around it's local x-axis and rotates the player game game object around it's y-axis.
             Vector2 input = _inputActions.Player.Look.ReadValue<Vector2>();
-            _lookAtTransformPitchAngle = Mathf.Clamp(_lookAtTransformPitchAngle + input.y * 60f * Time.deltaTime, -AIM_ROTATION_PITCH_MIN_ANGLE, AIM_ROTATION_PITCH_MAX_ANGLE);
+
+            _lookAtTransformPitchAngle = Mathf.Clamp(_lookAtTransformPitchAngle + (input.y * 60f * Time.deltaTime), AIM_ROTATION_PITCH_MIN_ANGLE, AIM_ROTATION_PITCH_MAX_ANGLE);
             _lookAtTransform.localRotation = Quaternion.Euler(_lookAtTransformPitchAngle, 0f, 0f);
+            
+
             
             transform.Rotate(0f, input.x * AIM_ROTATION_YAW_SPEED * Time.deltaTime, 0f);
         }
