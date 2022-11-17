@@ -69,6 +69,20 @@ public class PlayerController : Controller
     private Transform _lookAtTransform;
     private float _lookAtTransformPitchAngle = 0f;
 
+    // Bow and Arrow
+    [SerializeField]
+    private GameObject _bow;
+
+    [SerializeField]
+    private GameObject _arrowPrefab;
+    private GameObject _arrow;
+    [SerializeField]
+    private Transform _arrowSpawnTransform;
+
+    private bool _storedInitialRotation;
+    private Vector3 _initialSpineAngles;
+    private Vector3 _currentSpineAngles;
+
     #endregion
 
 
@@ -252,19 +266,40 @@ public class PlayerController : Controller
     private void Aim()
     {
         _freeLookCam.Priority = 0;
+        _weapon.gameObject.SetActive(false);
+        _bow.SetActive(true);
+        _arrow = Instantiate(_arrowPrefab, _arrowSpawnTransform.position, _arrowSpawnTransform.rotation, _arrowSpawnTransform);
         _anim.SetBool("aiming", true);
-        //_anim.Play("Bow Layer.Draw");
-        //_anim.SetLayerWeight(1, 1.0f);
+        StopCoroutine(LowerBow());
+        _anim.Play("Bow Layer.Draw");
+        _anim.SetLayerWeight(1, 1.0f);
         _currentMovmentSpeed = _strafeSpeed;
+        
     }
 
     private void ReleaseAim()
     {
         _anim.SetBool("aiming", false);
+        _storedInitialRotation = false;
+        _bow.SetActive(false);
+        Destroy(_arrow);
+        StartCoroutine(LowerBow());
         _freeLookCam.Priority = 10;
         _lookAtTransform.localRotation = Quaternion.identity;
         _lookAtTransformPitchAngle = 0f;
         _currentMovmentSpeed = _normalMovementSpeed;
+        _weapon.gameObject.SetActive(false);
+    }
+
+    private IEnumerator LowerBow()
+    {
+
+        for(int i = 0; i < 20; i++)
+        {
+            yield return new WaitForSecondsRealtime(.01f);
+            _anim.SetLayerWeight(1, Mathf.Clamp(_anim.GetLayerWeight(1) - .05f,0f, 1f));
+        }
+        
     }
 
 
@@ -282,7 +317,6 @@ public class PlayerController : Controller
         _controller.Move(movementInput * Time.deltaTime);
 
         RotatePlayer();
-        Debug.Log("Rotation Value: " + _lookAtTransform.localRotation.eulerAngles.x);
 
         _anim.SetFloat("velocity", _controller.velocity.magnitude);
         _anim.SetFloat("velocityX", _controller.velocity.x);
@@ -315,11 +349,35 @@ public class PlayerController : Controller
 
         AnimatorDodge();
 
+
+    }
+
+    // Use in late update to update the rotation of the spine bone so the character is oriented in the same direction as the look at 
+    // rotation when aiming (if it becomes a problem, set up the animation rigging with aim constraints)
+    private void UpdateSpineRotation()
+    {
+        if (_anim.GetBool("aiming") && _anim.GetLayerWeight(1) >= 1f)
+        {
+
+            if (!_storedInitialRotation)
+            {
+                _initialSpineAngles = _anim.GetBoneTransform(HumanBodyBones.Spine).localRotation.eulerAngles;
+                Debug.Log("Initial Spine Angles: "+_initialSpineAngles);
+                _currentSpineAngles = _initialSpineAngles;
+                _storedInitialRotation = true;
+            }
+            Vector2 input = _inputActions.Player.Look.ReadValue<Vector2>();
+
+            _anim.GetBoneTransform(HumanBodyBones.Spine).RotateAround(_anim.GetBoneTransform(HumanBodyBones.Spine).position,_anim.GetBoneTransform(HumanBodyBones.Spine).up, -_lookAtTransform.localRotation.eulerAngles.x);
+
+
+        }
+
     }
 
     private void LateUpdate()
     {
-
+        UpdateSpineRotation();
     }
     #endregion
 
@@ -355,8 +413,9 @@ public class PlayerController : Controller
             //rotate the child gameobject around it's local x-axis and rotates the player game game object around it's y-axis.
             Vector2 input = _inputActions.Player.Look.ReadValue<Vector2>();
 
-            _lookAtTransformPitchAngle = Mathf.Clamp(_lookAtTransformPitchAngle + (input.y * 60f * Time.deltaTime), AIM_ROTATION_PITCH_MIN_ANGLE, AIM_ROTATION_PITCH_MAX_ANGLE);
+            _lookAtTransformPitchAngle = Mathf.Clamp(_lookAtTransformPitchAngle + (-input.y * 60f * Time.deltaTime), AIM_ROTATION_PITCH_MIN_ANGLE, AIM_ROTATION_PITCH_MAX_ANGLE);
             _lookAtTransform.localRotation = Quaternion.Euler(_lookAtTransformPitchAngle, 0f, 0f);
+
             
 
             

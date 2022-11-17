@@ -96,8 +96,8 @@ public class EnemyPerception : MonoBehaviour
                     _playerIsInSight = true;
                 }
 
-                    if (hit.collider != null)
-                        Debug.Log(hit.collider.name);
+                    //if (hit.collider != null)
+                    //    Debug.Log(hit.collider.name);
 
             }
 

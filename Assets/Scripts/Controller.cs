@@ -14,6 +14,7 @@ public class Controller : MonoBehaviour
 
     protected const string BASE_LAYER = "Base Layer.";
 
+
     protected Weapon _weapon;
 
     [SerializeField]
