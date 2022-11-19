@@ -20,6 +20,7 @@ public class PlayerController : Controller
     private const float AIM_ROTATION_PITCH_MAX_ANGLE = 89f;
     private const float AIM_ROTATION_PITCH_MIN_ANGLE = -89f;
     private const float AIM_ROTATION_YAW_SPEED = 60f;
+    private const String ANIM_BOW_LAYER = "Bow Layer.";
 
     private PlayerInputActions _inputActions;
     private CharacterController _controller;
@@ -79,6 +80,15 @@ public class PlayerController : Controller
     [SerializeField]
     private Transform _arrowSpawnTransform;
 
+    private Coroutine _loweringBowRoutine;
+    private Coroutine _raisingBowRoutine;
+
+    [SerializeField]
+    private String[] _bowAnimationNames;
+
+    private bool _releaseArrow;
+    private bool _removeArrow;
+    private static System.Object arrowLock = new System.Object();
 
     #endregion
 
@@ -265,35 +275,93 @@ public class PlayerController : Controller
         _freeLookCam.Priority = 0;
         _weapon.gameObject.SetActive(false);
         _bow.SetActive(true);
-        _arrow = Instantiate(_arrowPrefab, _arrowSpawnTransform.position, _arrowSpawnTransform.rotation, _arrowSpawnTransform);
+        _releaseArrow = false;
+       
+        
         _anim.SetBool("aiming", true);
-        StopCoroutine(LowerBow());
-        _anim.Play("Bow Layer.Draw");
-        _anim.SetLayerWeight(1, 1.0f);
+        if(_loweringBowRoutine != null)
+            StopCoroutine(_loweringBowRoutine);
+
+        _raisingBowRoutine = StartCoroutine(LowerOrRaiseBow(false));
         _currentMovmentSpeed = _strafeSpeed;
         
     }
 
+    private void CreateArrow()
+    {
+
+        _releaseArrow = false;
+        _arrow = Instantiate(_arrowPrefab, _arrowSpawnTransform.position, _arrowSpawnTransform.rotation, _arrowSpawnTransform);
+        
+        Physics.IgnoreCollision(_arrow.GetComponent<BoxCollider>(), _controller);
+    }
+
+    private void ResetAim()
+    {
+        _anim.SetBool("shoot", false);
+    }
+
+    private void ReadyToShoot()
+    {
+        _anim.SetBool("shoot", true);
+    }
+
+    private void ReleaseArrow()
+    {
+        _releaseArrow = true;
+        //shoot arrow
+    }
+
+    private void ShootArrow()
+    {
+
+            _arrow.transform.SetParent(null);
+            _arrow.GetComponent<Rigidbody>().isKinematic = false;
+            _arrow.GetComponent<Rigidbody>().AddForce(_lookAtTransform.forward * 15f, ForceMode.Impulse);
+            Destroy(_arrow, 5f);
+            _arrow = null;
+            _releaseArrow = false;
+            _anim.SetBool("shoot", false);
+
+
+    }
+
+    private void DestroyArrow(GameObject arrow)
+    {
+            Destroy(arrow);
+
+    }
+
+
     private void ReleaseAim()
     {
+        if (!_releaseArrow)
+            Destroy(_arrow);
+        _arrow = null;
+        _releaseArrow = false;
         _anim.SetBool("aiming", false);
+
         _bow.SetActive(false);
-        Destroy(_arrow);
-        StartCoroutine(LowerBow());
+
+        if (_raisingBowRoutine != null)
+            StopCoroutine(_raisingBowRoutine);
+
+        _loweringBowRoutine = StartCoroutine(LowerOrRaiseBow(true));
         _freeLookCam.Priority = 10;
         _lookAtTransform.localRotation = Quaternion.identity;
         _lookAtTransformPitchAngle = 0f;
         _currentMovmentSpeed = _normalMovementSpeed;
-        _weapon.gameObject.SetActive(false);
+        _weapon.gameObject.SetActive(true);
     }
 
-    private IEnumerator LowerBow()
+    private IEnumerator LowerOrRaiseBow(bool lower)
     {
 
         for(int i = 0; i < 20; i++)
         {
             yield return new WaitForSecondsRealtime(.01f);
-            _anim.SetLayerWeight(1, Mathf.Clamp(_anim.GetLayerWeight(1) - .05f,0f, 1f));
+            
+            _anim.SetLayerWeight(1, Mathf.Clamp(_anim.GetLayerWeight(1) + (lower == true ? -.05f: .05f),0f, 1f));
         }
         
     }
@@ -313,6 +381,12 @@ public class PlayerController : Controller
         _controller.Move(movementInput * Time.deltaTime);
 
         RotatePlayer();
+
+        if(_arrow != null && _releaseArrow)
+        {
+            ShootArrow();
+        }
+
 
         _anim.SetFloat("velocity", _controller.velocity.magnitude);
         _anim.SetFloat("velocityX", _controller.velocity.x);
@@ -337,6 +411,9 @@ public class PlayerController : Controller
         _lookAtTransform = GameObject.FindGameObjectWithTag("CinemachineTarget").transform;
         _controller = GetComponent<CharacterController>();
         _soundStimuli = GetComponentInChildren<SoundStimuli>();
+
+        foreach (string animName in _bowAnimationNames)
+            _animToId.Add(ANIM_BOW_LAYER + animName, Animator.StringToHash(ANIM_BOW_LAYER + animName));
     }
 
     private void OnAnimatorMove()
@@ -364,7 +441,8 @@ public class PlayerController : Controller
 
     private void LateUpdate()
     {
-        UpdateSpineRotation();
+        if(_anim.GetBool("aiming"))
+            UpdateSpineRotation();
     }
     #endregion
 
@@ -380,34 +458,37 @@ public class PlayerController : Controller
 
     private void RotatePlayer()
     {
-
-       
-        if(!_anim.GetBool("aiming"))
+        if (!_anim.GetBool("dodging"))
         {
-            //The character is rotated based on the movement input
-            Vector2 input = _inputActions.Player.Walk.ReadValue<Vector2>();
-            
-            if(input.sqrMagnitude > 0f)
+            if (!_anim.GetBool("aiming"))
             {
-                float yawAngle = Mathf.Atan2(input.x, input.y) * Mathf.Rad2Deg + Camera.main.transform.eulerAngles.y;
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(0f, yawAngle, 0f), MOVEMENT_ROTATION_DELTA_ANGLE);
+                //The character is rotated based on the movement input
+                Vector2 input = _inputActions.Player.Walk.ReadValue<Vector2>();
+
+                if (input.sqrMagnitude > 0f)
+                {
+                    float yawAngle = Mathf.Atan2(input.x, input.y) * Mathf.Rad2Deg + Camera.main.transform.eulerAngles.y;
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(0f, yawAngle, 0f), MOVEMENT_ROTATION_DELTA_ANGLE);
+                }
+
             }
+            else
+            {
+                //The 3rd-Person camera is looking at a gameobject that is a child of the player game object. The look input is used to
+                //rotate the child gameobject around it's local x-axis and rotates the player game game object around it's y-axis.
+                Vector2 input = _inputActions.Player.Look.ReadValue<Vector2>();
 
+                _lookAtTransformPitchAngle = Mathf.Clamp(_lookAtTransformPitchAngle + (-input.y * 60f * Time.deltaTime), AIM_ROTATION_PITCH_MIN_ANGLE, AIM_ROTATION_PITCH_MAX_ANGLE);
+                _lookAtTransform.localRotation = Quaternion.Euler(_lookAtTransformPitchAngle, 0f, 0f);
+
+
+
+
+                transform.Rotate(0f, input.x * AIM_ROTATION_YAW_SPEED * Time.deltaTime, 0f);
+            }
         }
-        else
-        {
-            //The 3rd-Person camera is looking at a gameobject that is a child of the player game object. The look input is used to
-            //rotate the child gameobject around it's local x-axis and rotates the player game game object around it's y-axis.
-            Vector2 input = _inputActions.Player.Look.ReadValue<Vector2>();
+       
 
-            _lookAtTransformPitchAngle = Mathf.Clamp(_lookAtTransformPitchAngle + (-input.y * 60f * Time.deltaTime), AIM_ROTATION_PITCH_MIN_ANGLE, AIM_ROTATION_PITCH_MAX_ANGLE);
-            _lookAtTransform.localRotation = Quaternion.Euler(_lookAtTransformPitchAngle, 0f, 0f);
-
-            
-
-            
-            transform.Rotate(0f, input.x * AIM_ROTATION_YAW_SPEED * Time.deltaTime, 0f);
-        }
         
     }
 
